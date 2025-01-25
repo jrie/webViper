@@ -70,13 +70,13 @@ const currentPageLocation = window.location.href.toLocaleLowerCase();
 function replaceElement (keyword, toReplace) {
   if (toReplace.parentNode) {
     const replacement = document.createElement(toReplace.nodeName.toLocaleLowerCase());
-    replacement.className = toReplace.className + ' detrumpified';
+    replacement.className = toReplace.className + ' vipered';
     replacement.style.width = toReplace.clienWidth + 'px';
     replacement.style.height = toReplace.clienHeight + 'px';
     replacement.style.border = toReplace.style.border ? toReplace.style.border : '1px dashed black';
     replacement.style.textAlign = 'left';
     replacement.style.padding = '0.5rem 1rem';
-    replacement.innerHTML = '<span style="color: #666;">This item was trumpified by<br><span style="color: red; font-weight: bold; font-size: 1.65rem; text-transform: capitalize;">' + keyword + '</span></span>';
+    replacement.innerHTML = '<span style="color: #666;">This item was viped by<br><span style="color: red; font-weight: bold; font-size: 1.65rem; text-transform: capitalize;">' + keyword + '</span></span>';
     toReplace.parentNode.replaceChild(replacement, toReplace);
     return true;
   }
@@ -176,7 +176,7 @@ for (const url of Object.keys(ruleSet)) {
   }
 }
 
-console.log('DEBUG: Trumpifier run succesfull, removed items:', removedItems);
+console.log('DEBUG: Viped run succesfull, removed items:', removedItems);
 if (removedItems !== 0) {
-  window.alert('Trumpified items: ' + removedItems);
+  window.alert('Viped items: ' + removedItems);
 }
