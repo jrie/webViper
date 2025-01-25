@@ -46,10 +46,10 @@ const ruleSet = {
       // You could also use 'img.className' too like
       // 'img.classNameClass': ['article.stage-teaser']
     }
-  }
-}, {
-  'anotherURL2rule.net': {
-    .....
+  }, {
+    'anotherURL2rule.net': {
+      .....
+    }
   }
 }
 ```
