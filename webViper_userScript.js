@@ -4,7 +4,7 @@
 // @version      2025-01-26
 // @description  vipe the web, like a pro, using the webViper
 // @author       Jan Riechers
-// @match        http*://
+// @match        http*://*
 // @run-at       document-end
 // @supportURL   https://github.com/jrie/webViper
 // @grant        none
@@ -30,6 +30,7 @@ const ruleSet = {
     elementContainers: {
       // List of Tags/CSS Selectors and HTML Tag elements with there respective "parent containers", containing them, which should be removed
       a: ['article.stage-teaser', '.news-ticker-item'],
+      'a.anchor': ['div.slider__item'],
       // OR for only "a" class "stage-teaser__anchor" class "a" elements
       // 'a.stage-teaser__anchor': ['article.stage-teaser', '.news-ticker-item'],
       // And you can use multiple "a." rules if required
@@ -191,4 +192,5 @@ for (const url of Object.keys(ruleSet)) {
 console.log('webViper DEBUG: Viped run succesfull, removed items:', removedItems);
 if (removedItems !== 0) {
   // window.alert('Viped items: ' + removedItems);
+
 }
