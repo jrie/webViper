@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         webViper
 // @namespace    webViper
-// @version      2025-01-25
+// @version      2025-01-26
 // @description  vipe the web, like a pro, using the webViper
 // @author       Jan Riechers
 // @match        http*://
@@ -188,7 +188,7 @@ for (const url of Object.keys(ruleSet)) {
   }
 }
 
-console.log('DEBUG: Viped run succesfull, removed items:', removedItems);
+console.log('webViper DEBUG: Viped run succesfull, removed items:', removedItems);
 if (removedItems !== 0) {
-  window.alert('Viped items: ' + removedItems);
+  // window.alert('Viped items: ' + removedItems);
 }
