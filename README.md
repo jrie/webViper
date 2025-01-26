@@ -17,36 +17,50 @@ There are currently two flavours:
 The definition for a website is in `const ruleSet`, here for the news magazine `www.bild.de`.
 
 ```javascript
-// Small config rules
+// Small config rules inside "ruleSet"
 const ruleSet = {
-  // Target 'url' or 'url part': 'www.bild.de' could also translate to 'bild.de', also possible.
-  'www.bild.de': {
-    // List of keywords to search for and vipe out
-    keywords: [
-      'Trump',
-      'Harry'
-    ],
-    // List of excludes, "url pathes" or "any other content or word"
-    excludes: [
-      '/corporate-site/',
-      '/corporate/'
-    ],
-    // Should elements be removed? true / false
-    removeElement: true,
-    // Target and target container list
-    elementContainers: {
-      // List of Tags/CSS Selectors and HTML Tag elements with there respective "parent containers", containing them, which should be removed
-      a: ['article.stage-teaser', '.news-ticker-item'],
-      // OR for only "a" class "stage-teaser__anchor" class "a" elements
-      // 'a.stage-teaser__anchor': ['article.stage-teaser', '.news-ticker-item'],
-      // And you can use multiple "a." rules if required
-      // OR only ".className" / "#id":
-      // '.stage-teaser__anchor': ['article.stage-teaser', '.news-ticker-item'],
-      img: ['article.stage-teaser']
-      // You could also use 'img.className' too like
-      // 'img.classNameClass': ['article.stage-teaser']
-    }
-  }, {
+
+    // First target "url" or "url part"
+    // Here: 'www.bild.de', but also 'bild.de' could be used.
+    'www.bild.de': {
+
+        // List of keywords to search for and vipe out
+        keywords: [
+            'Trump',
+            'Harry'
+        ],
+
+        // List of excludes, "url pathes" or "any other word"
+        // can be empty also.
+        excludes: [
+            '/corporate-site/',
+            '/corporate/'
+        ],
+
+        // Should elements be removed? true / false
+        removeElement: true,
+
+        // List of Tags/CSS Selectors and HTML Tag elements
+        elementContainers: {
+
+            // "a" (Link) HTML-Tag
+            // and a list of possible containing parents:
+            // - 'article.stage-teaser'
+            // - '.news-ticker-item'
+            a: ['article.stage-teaser', '.news-ticker-item'],
+
+            // or for only "a" CSS class "stage-teaser__anchor" class "a" HTML tags
+            'a.stage-teaser__anchor': ['article.stage-teaser', '.news-ticker-item'],
+
+            // And you can use multiple "a." rules if required
+            // or only ".className" / "#id", like..
+            // '.stage-teaser__anchor': ['article.stage-teaser', '.news-ticker-item']
+
+            img: ['article.stage-teaser'],
+            // You could also use 'img.className' too
+            // 'img.classNameClass': ['article.stage-teaser']
+        }
+    }, {
     'anotherURL2rule.net': {
       .....
     }
