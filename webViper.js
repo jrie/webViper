@@ -176,7 +176,7 @@ for (const url of Object.keys(ruleSet)) {
   }
 }
 
-console.log('DEBUG: Viped run succesfull, removed items:', removedItems);
+console.log('webViper DEBUG: Viped run succesfull, removed items:', removedItems);
 if (removedItems !== 0) {
-  window.alert('Viped items: ' + removedItems);
+  // window.alert('Viped items: ' + removedItems);
 }
