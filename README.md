@@ -9,7 +9,7 @@ vipe the web, like a pro, using the webViper!
 
 ## Usage options for the viper
 There are currently two flavours:
-- *webViper_userScript.js* for usage with a browser "userscript"-addons like *Tampermonkey*, *Greasemonkey* or alike (currently recommended!)
+- *webViper-userScript.js* for usage with a browser "userscript"-addons like *Tampermonkey*, *Greasemonkey* or alike (currently recommended!)
 - *webViper.js* only the javascript code - as foundation for later.. u and me and we will see!
 
 ## Filter rules, how to get clearing out working
@@ -68,7 +68,10 @@ const ruleSet = {
 }
 ```
 
-### Video guide on how to add new rules
+### Rule template
+For easier editing, the file `webViper-rule-template.js` contains a basic template for easy copy and paste into the userscript and script file.
+
+## Video guide on how to add new rules
 A video demonstration how to add and extend the `ruleSet` rules and identify a cleaning item.
 
 https://github.com/user-attachments/assets/6d8ade11-f793-46f5-a692-fbe1cdf35888
