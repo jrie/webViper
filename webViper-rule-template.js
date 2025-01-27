@@ -20,7 +20,7 @@
             //CSSselector2: ['cssSelectorParent1', 'cssSelectorParent2']
         },
         removeElement: true
-}
+    }
 //
 // }
 //
