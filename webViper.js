@@ -59,11 +59,13 @@ const ruleSet = {
 };
 
 // -----------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
 const currentPageLocation = window.location.href.toLocaleLowerCase();
 
 // -----------------------------------------------------------------------------------
 function replaceElement (keyword, toReplace) {
   if (toReplace.parentNode) {
+    const keyword = 'webViper';
     const replacement = document.createElement(toReplace.nodeName.toLocaleLowerCase());
     replacement.className = toReplace.className + ' vipered';
     replacement.style.width = toReplace.clienWidth + 'px';
@@ -198,8 +200,10 @@ for (const url of Object.keys(ruleSet)) {
   }
 }
 
+let vipedByViper = 0;
 for (const key of Object.keys(removedByKeywords)) {
   console.log('[DEBUG] webViper removed: "' + key + '" ----> ' + removedByKeywords[key]);
+  vipedByViper += removedByKeywords[key];
 }
 
-console.log('[DEBUG] webViper run successful.');
+console.log('[DEBUG] webViper run successful, viped in total: ', vipedByViper);

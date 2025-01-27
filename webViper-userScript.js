@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         webViper
 // @namespace    webViper
-// @version      2025-01-26
+// @version      2025-01-27
 // @description  vipe the web, like a pro, using the webViper
 // @author       Jan Riechers
 // @match        http*://*
@@ -59,7 +59,7 @@ const ruleSet = {
 
     ],
     elementContainers: {
-      a: ['a.pr-small', 'div.column'],
+      a: ['a.pr-smAall', 'div.column'],
       h2: ['section.columns'],
       h3: ['section.columns']
     },
@@ -76,6 +76,7 @@ const currentPageLocation = window.location.href.toLocaleLowerCase();
 // -----------------------------------------------------------------------------------
 function replaceElement (keyword, toReplace) {
   if (toReplace.parentNode) {
+    const keyword = 'webViper';
     const replacement = document.createElement(toReplace.nodeName.toLocaleLowerCase());
     replacement.className = toReplace.className + ' vipered';
     replacement.style.width = toReplace.clienWidth + 'px';
@@ -210,8 +211,10 @@ for (const url of Object.keys(ruleSet)) {
   }
 }
 
+let vipedByViper = 0;
 for (const key of Object.keys(removedByKeywords)) {
   console.log('[DEBUG] webViper removed: "' + key + '" ----> ' + removedByKeywords[key]);
+  vipedByViper += removedByKeywords[key];
 }
 
-console.log('[DEBUG] webViper run successful.');
+console.log('[DEBUG] webViper run successful, viped in total: ', vipedByViper);
