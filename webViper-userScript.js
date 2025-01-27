@@ -12,33 +12,19 @@
 
 // Small config
 const ruleSet = {
-  // Target 'url' or 'url part': 'www.bild.de' could also translate to 'bild.de'
   'www.bild.de': {
-    // List of keywords to search for and vipe out
     keywords: [
       'Trump',
       'Harry'
     ],
-    // List of excludes, "url pathes" or "any other content or word"
     excludes: [ //
       '/corporate-site/',
       '/corporate/'
     ],
-    // Should elements be removed? true / false
     removeElement: true,
-    // Target and target container list
     elementContainers: {
-      // List of Tags/CSS Selectors and HTML Tag elements with there respective "parent containers", containing them, which should be removed
-      a: ['article.stage-teaser', '.news-ticker-item'],
-      'a.anchor': ['div.slider__item'],
-      // OR for only "a" class "stage-teaser__anchor" class "a" elements
-      // 'a.stage-teaser__anchor': ['article.stage-teaser', '.news-ticker-item'],
-      // And you can use multiple "a." rules if required
-      // OR only ".className" / "#id":
-      // '.stage-teaser__anchor': ['article.stage-teaser', '.news-ticker-item'],
+      a: ['article.stage-teaser', '.news-ticker-item', 'div.slider__item'],
       img: ['article.stage-teaser']
-      // You could also use 'img.className' too like
-      // 'img.classNameClass': ['article.stage-teaser']
     }
   },
   'www.spiegel.de': {
@@ -61,7 +47,6 @@ const ruleSet = {
       'Harry'
     ],
     excludes: [
-      // empty
     ],
     elementContainers: {
       a: ['a.pr-small', 'div.column'],
@@ -70,16 +55,11 @@ const ruleSet = {
     },
     removeElement: true
   },
-  // Not used yet
   globalKeywords: []
 };
 
-// Change this for local testing comment out "const currentPageLocation = window.location.href.toLocaleLowerCase();":
-// use "const currentPageLocation = 'www.bild.de';" // Replace "www.bild.de" with ruleSet name for the page you want to adapt
 const currentPageLocation = window.location.href.toLocaleLowerCase();
-// const currentPageLocation = 'www.bild.de';
 
-// Main cleaner routine
 function replaceElement (keyword, toReplace) {
   if (toReplace.parentNode) {
     const replacement = document.createElement(toReplace.nodeName.toLocaleLowerCase());
@@ -192,5 +172,4 @@ for (const url of Object.keys(ruleSet)) {
 console.log('webViper DEBUG: Viped run succesfull, removed items:', removedItems);
 if (removedItems !== 0) {
   // window.alert('Viped items: ' + removedItems);
-
 }
