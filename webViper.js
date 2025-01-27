@@ -2,12 +2,10 @@
 const ruleSet = {
   'www.bild.de': {
     keywords: [
-      'Trump',
-      'Harry'
+
     ],
-    excludes: [ //
-      '/corporate-site/',
-      '/corporate/'
+    excludes: [
+
     ],
     removeElement: true,
     elementContainers: {
@@ -17,11 +15,10 @@ const ruleSet = {
   },
   'www.spiegel.de': {
     keywords: [
-      'Trump',
-      'Harry'
+
     ],
     excludes: [
-      // empty
+
     ],
     elementContainers: {
       a: ['li', 'article'],
@@ -31,10 +28,10 @@ const ruleSet = {
   },
   'taz.de': {
     keywords: [
-      'Trump',
-      'Harry'
+
     ],
     excludes: [
+
     ],
     elementContainers: {
       a: ['a.pr-small', 'div.column'],
