@@ -1,9 +1,9 @@
 # webViper
 
-vipe the web, like a pro, using the webViper!
+vipe the web using the webViper!
 
 ## webViper in short
-*webViper* is a highly configureable element removal/cleaner (not blocker!) for the web.
+*webViper* is a highly configureable element removal/cleaner for the web.
 
 ![teaser-stores-640x400](https://github.com/user-attachments/assets/0087ef71-9ce6-43bf-b38f-f65b427f8c99)
 
@@ -17,55 +17,41 @@ There are currently two flavours:
 The definition for a website is in `const ruleSet`, here for the news magazine `www.bild.de`.
 
 ```javascript
+//
 // Small config rules inside "ruleSet"
-const ruleSet = {
-
-    // First target "url" or "url part"
-    // Here: 'www.bild.de', but also 'bild.de' could be used.
-    'www.bild.de': {
-
-        // List of keywords to search for and vipe out
+//
+// const ruleSet = {
+//
+    // A url which identifies the website
+    'websiteURL.net': {
         keywords: [
-            'Trump',
-            'Harry'
+            // 'keyword1',
+            // 'keyword2',
         ],
-
-        // List of excludes, "url pathes" or "any other word"
-        // can be empty also.
         excludes: [
-            '/corporate-site/',
-            '/corporate/'
+            // Can be empty
+            // 'exlucde1',
+            // 'exlucde2'
         ],
-
-        // Should elements be removed? true / false
-        removeElement: true,
-
-        // List of Tags/CSS Selectors and HTML Tag elements
         elementContainers: {
-
-            // "a" (Link) HTML-Tag
-            // and a list of possible containing parents:
-            // - 'article.stage-teaser'
-            // - '.news-ticker-item'
-            a: ['article.stage-teaser', '.news-ticker-item'],
-
-            // or for only "a" CSS class "stage-teaser__anchor" class "a" HTML tags
-            'a.stage-teaser__anchor': ['article.stage-teaser', '.news-ticker-item'],
-
-            // And you can use multiple "a." rules if required
-            // or only ".className" / "#id", like..
-            // '.stage-teaser__anchor': ['article.stage-teaser', '.news-ticker-item']
-
-            img: ['article.stage-teaser'],
-            // You could also use 'img.className' too
+            // CSSselector1: ['cssSelectorParent1', 'cssSelectorParent2'],
+            // CSSselector2: ['cssSelectorParent1', 'cssSelectorParent2']
+            //
+            // For example:
+            // a: ['article.stage-teaser', '.news-ticker-item'],
+            // 'a.stage-teaser__anchor': ['article.stage-teaser', '.news-ticker-item'],
             // 'img.classNameClass': ['article.stage-teaser']
-        }
-    }, {
-    'anotherURL2rule.net': {
-      .....
+            //
+            // You could also use:
+            // 'img#id': ['.className1', '#id']
+            // 'img.className': ['.className1', '#id']
+            //
+        },
+        removeElement: true
     }
-  }
-}
+//
+// }
+//
 ```
 
 ### Rule template
