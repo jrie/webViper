@@ -99,12 +99,9 @@ function replaceElement (keyword, toReplace) {
     const keyword = 'webViper';
     const replacement = document.createElement(toReplace.nodeName.toLocaleLowerCase());
     replacement.className = toReplace.className + ' vipered';
-    replacement.style.width = toReplace.clienWidth + 'px';
-    replacement.style.height = toReplace.clienHeight + 'px';
-    replacement.style.border = toReplace.style.border ? toReplace.style.border : '1px dashed black';
     replacement.style.textAlign = 'left';
-    replacement.style.padding = '0.5rem 1rem';
-    replacement.innerHTML = '<span style="color: #666;">This item was viped by<br><span style="color: red; font-weight: bold; font-size: 1.65rem;">' + keyword + '</span></span>';
+    replacement.style.padding = '1.5vw 1.2vw';
+    replacement.innerHTML = '<span style="color: #666;">This item was viped by <br><span style="color: red; font-weight: bold; font-size: 1.65vw;">' + keyword + '</span></span>';
     toReplace.parentNode.replaceChild(replacement, toReplace);
     return true;
   }
