@@ -1,16 +1,25 @@
 // ==UserScript==
 // @name         webViper
 // @namespace    webViper
-// @version      2025-01-27
+// @version      2025-01-28
 // @description  vipe the web, like a pro, using the webViper
 // @author       Jan Riechers
-// @match        http*://*
+// @match        http*://*/
 // @run-at       document-end
 // @supportURL   https://github.com/jrie/webViper
 // @grant        none
 // ==/UserScript==
 
+// -----------------------------------------------------------------------------------
 // Small config
+
+// This will output some more information to debug console if enabled
+// otherwise only log console statements are used
+const doDebug = false;
+
+// -----------------------------------------------------------------------------------
+// webpage rules start
+// -----------------------------------------------------------------------------------
 const ruleSet = {
   'www.bild.de': {
     keywords: [
@@ -32,11 +41,11 @@ const ruleSet = {
     excludes: [
 
     ],
+    removeElement: true,
     elementContainers: {
       a: ['li', 'article'],
       h2: ['div.shrink-0', 'article']
-    },
-    removeElement: true
+    }
   },
 
   'www.stern.de': {
@@ -46,11 +55,29 @@ const ruleSet = {
     excludes: [
 
     ],
+    removeElement: true,
     elementContainers: {
-      a: ['article.teaser', 'article.teaser-opulent']
-    },
-    removeElement: true
+      a: ['article.teaser', 'article.teaser-opulent', 'article.teaser-plaintext']
+    }
   },
+
+  'www.focus.de': {
+    keywords: [
+
+    ],
+    excludes: [
+
+    ],
+    removeElement: true,
+    elementContainers: {
+      'div#topArticleTitle': ['div#topArticle'],
+      a: ['li[data-vr-contentbox=""]'],
+      'a.ps-hover': ['article.promo'],
+      h3: ['li']
+
+    }
+  },
+
   'taz.de': {
     keywords: [
 
@@ -58,20 +85,25 @@ const ruleSet = {
     excludes: [
 
     ],
+    removeElement: true,
     elementContainers: {
       a: ['a.pr-smAall', 'div.column'],
       h2: ['section.columns'],
       h3: ['section.columns']
-    },
-    removeElement: true
+    }
   },
+
   globalKeywords: [
 
   ]
 };
+// -----------------------------------------------------------------------------------
+// webpage rules end - stop editing here
+// -----------------------------------------------------------------------------------
 
 // -----------------------------------------------------------------------------------
 const currentPageLocation = window.location.href.toLocaleLowerCase();
+const outputConsole = doDebug ? console.debug : console.log;
 
 // -----------------------------------------------------------------------------------
 function replaceElement (keyword, toReplace) {
@@ -84,7 +116,7 @@ function replaceElement (keyword, toReplace) {
     replacement.style.border = toReplace.style.border ? toReplace.style.border : '1px dashed black';
     replacement.style.textAlign = 'left';
     replacement.style.padding = '0.5rem 1rem';
-    replacement.innerHTML = '<span style="color: #666;">This item was viped by<br><span style="color: red; font-weight: bold; font-size: 1.65rem; text-transform: capitalize;">' + keyword + '</span></span>';
+    replacement.innerHTML = '<span style="color: #666;">This item was viped by<br><span style="color: red; font-weight: bold; font-size: 1.65rem;">' + keyword + '</span></span>';
     toReplace.parentNode.replaceChild(replacement, toReplace);
     return true;
   }
@@ -102,11 +134,15 @@ function createKeywordsRemovalDict (keyWordDict, keywordArray) {
 }
 
 // -----------------------------------------------------------------------------------
-function doParse (globalKeywords, targetKeywords, targetContainers, targetExcludes, targetHasExcludes, targetRemove) {
-  const removedByKeyword = {};
-
+function doParse (removedByKeywords, targetContainers, targetExcludes, targetHasExcludes, targetRemove) {
   for (const containerKey of Object.keys(targetContainers)) {
     const targets = document.querySelectorAll(containerKey);
+    if (targets.length === 0) {
+      outputConsole('[webViper] [ RUN ] [ PARSE ] No \'targets\' found for selector: \'' + containerKey + '\'');
+      continue;
+    }
+
+    let excludeCount = 0;
     for (const nodeElement of targets) {
       let parentContainer = null;
       for (const nodeElmentParentContainer of targetContainers[containerKey]) {
@@ -117,6 +153,10 @@ function doParse (globalKeywords, targetKeywords, targetContainers, targetExclud
       }
 
       if (!parentContainer) {
+        if (doDebug) {
+          outputConsole('[webViper] [ DEBUG ] [ PARSE ] No \'parentContainer\' found for selector: \'' + containerKey + '\'');
+        }
+
         continue;
       }
 
@@ -127,6 +167,7 @@ function doParse (globalKeywords, targetKeywords, targetContainers, targetExclud
         for (const exclude of targetExcludes) {
           if (data.indexOf(exclude) > -1) {
             hasExclude = true;
+            ++excludeCount;
             break;
           }
         }
@@ -137,14 +178,11 @@ function doParse (globalKeywords, targetKeywords, targetContainers, targetExclud
       }
 
       if (targetRemove) {
-        createKeywordsRemovalDict(removedByKeyword, globalKeywords);
-        createKeywordsRemovalDict(removedByKeyword, targetKeywords);
-
-        for (const keyword of Object.keys(removedByKeyword)) {
+        for (const keyword of Object.keys(removedByKeywords)) {
           const keywordLower = keyword.toLocaleLowerCase();
           if (data.indexOf(keywordLower) > -1) {
             if (replaceElement(keyword, parentContainer)) {
-              ++removedByKeyword[keyword];
+              ++removedByKeywords[keyword];
             }
 
             break;
@@ -152,15 +190,25 @@ function doParse (globalKeywords, targetKeywords, targetContainers, targetExclud
         }
       }
     }
-  }
 
-  return removedByKeyword;
+    if (excludeCount !== 0) {
+      outputConsole('[webViper] [ RUN ] [ PARSE ] Excluded for \'' + containerKey + '\' --->' + excludeCount);
+    }
+  }
 }
 
 // -----------------------------------------------------------------------------------
+if (doDebug) {
+  outputConsole('[webViper] [ DEBUG START ] -----------------------------------');
+}
+
+outputConsole('[webViper] [ RUN ] Start.');
+
 const removedByKeywords = {};
 for (const url of Object.keys(ruleSet)) {
   if (currentPageLocation.indexOf(url) > -1) {
+    outputConsole('[webViper] [ RUN ] Rule matched for: ' + url);
+
     const targetUrl = url;
     let globalKeywords = [];
     let targetKeywords = [];
@@ -179,11 +227,6 @@ for (const url of Object.keys(ruleSet)) {
 
     if (Object.hasOwn(ruleSet[targetUrl], 'elementContainers')) {
       targetContainers = ruleSet[targetUrl].elementContainers;
-      for (const targetContainerSelector of Object.keys(targetContainers)) {
-        if (targetContainerSelector.length === 0) {
-          targetContainers[targetContainerSelector] = ['div'];
-        }
-      }
     }
 
     if (Object.hasOwn(ruleSet[targetUrl], 'excludes')) {
@@ -197,24 +240,33 @@ for (const url of Object.keys(ruleSet)) {
       targetRemove = true;
     }
 
-    const removedKeywords = doParse(globalKeywords, targetKeywords, targetContainers, targetExcludes, targetHasExcludes, targetRemove);
-
-    for (const key of Object.keys(removedKeywords)) {
-      if (Object.hasOwn(removedByKeywords, key)) {
-        removedByKeywords[key] += removedKeywords[key];
-      } else {
-        removedByKeywords[key] = removedKeywords[key];
-      }
+    if (doDebug) {
+      outputConsole('[webViper] [ DEBUG ] global keywords    : ', globalKeywords);
+      outputConsole('[webViper] [ DEBUG ] rule               : ', targetUrl);
+      outputConsole('[webViper] [ DEBUG ] keywords           : ', targetKeywords);
+      outputConsole('[webViper] [ DEBUG ] elementContainers  : ', targetContainers);
+      outputConsole('[webViper] [ DEBUG ] excludes           : ', targetExcludes);
     }
 
+    createKeywordsRemovalDict(removedByKeywords, globalKeywords);
+    createKeywordsRemovalDict(removedByKeywords, targetKeywords);
+
+    doParse(removedByKeywords, targetContainers, targetExcludes, targetHasExcludes, targetRemove);
     break;
   }
 }
 
 let vipedByViper = 0;
 for (const key of Object.keys(removedByKeywords)) {
-  console.log('[DEBUG] webViper removed: "' + key + '" ----> ' + removedByKeywords[key]);
-  vipedByViper += removedByKeywords[key];
+  const amount = removedByKeywords[key];
+  if (amount > 0) {
+    outputConsole('[webViper] Removed for keyword  : ' + key + ' ----> ' + amount);
+    vipedByViper += amount;
+  }
 }
 
-console.log('[DEBUG] webViper run successful, viped in total: ', vipedByViper);
+outputConsole('[webViper] [ RUN ] Run end.' + (vipedByViper !== 0 ? (' Viped items: ' + vipedByViper) : ' No viped items.'));
+
+if (doDebug) {
+  outputConsole('[webViper] [ DEBUG END ] -------------------------------------');
+}
