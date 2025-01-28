@@ -9,7 +9,7 @@ vipe the web, like a pro, using the webViper!
 
 ## Usage options for the viper
 There are currently two flavours:
-- *webViper-userScript.js* for usage with a browser "userscript"-addons like *Tampermonkey*, *Greasemonkey* or alike (currently recommended!)
+- *webViper-userScript.js* for usage with a browser "userscript"-addons like *Tampermonkey*, *Violentmonkey* (currently recommended!)
 - *webViper.js* only the javascript code - as foundation for later.. u and me and we will see!
 
 ## Filter rules, how to get clearing out working
