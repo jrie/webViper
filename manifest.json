@@ -1,0 +1,58 @@
+{
+  "developer": {
+    "name": "Jan Riechers",
+    "url": "https://www.dwrox.net"
+  },
+  "action": {
+    "default_title": "webViper - vipe the web",
+    "default_popup": "addon-srcs/webviper-addon-ui.opener.html",
+    "default_icon": {
+      "48": "addon-srcs/webviper-icon-48x48.png",
+      "64": "addon-srcs/webviper-icon-64x64.png",
+      "96": "addon-srcs/webviper-icon-96x96.png",
+      "128": "addon-srcs/webviper-icon-128x128.png"
+    }
+  },
+  "description": "vipe the web using the viper",
+  "icons": {
+    "48": "addon-srcs/webviper-icon-48x48.png",
+    "64": "addon-srcs/webviper-icon-64x64.png",
+    "96": "addon-srcs/webviper-icon-96x96.png",
+    "128": "addon-srcs/webviper-icon-128x128.png"
+  },
+  "homepage_url": "https://github.com/jrie/webViper",
+  "manifest_version": 3,
+  "name": "webViper",
+  "version": "1.0.0",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "unlimitedStorage"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "scripts": [
+      "/addon-srcs/webViper-addon.js"
+    ]
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": [
+        "/addon-srcs/webViper-addon.js"
+      ],
+      "run_at": "document_end"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["/addon-srcs/*"],
+      "matches": []
+    }
+  ]
+}
