@@ -9,9 +9,11 @@ vipe the web using the webViper!
 
 
 ## Usage options for the viper
-There are currently two flavours:
 - *webViper-userScript.js* for usage with a browser "userscript"-addons like *Tampermonkey*, *Violentmonkey* (currently recommended!)
-- *webViper.js* only the javascript code - as foundation for later.. u and me and we will see!
+
+- *webViper* in the folder `addon-srcs` to load as temporary addon/extension in Firefox `about:debugging`, `This Firefox` and `Load temporary extension`.
+This is only for testing the UI for now, but rules, keywords and entered details are already applied, as long as the extension is installed.
+Since there is no export, it is recommended to try out the UI, but do not enter a lot of information, those would be lost on uninstall/removal.
 
 
 ## Screenshot of a wiped item
