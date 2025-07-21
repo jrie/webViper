@@ -123,8 +123,6 @@ async function loadSettings () {
 
   // ---------------------------------------------------------------------------------
   let doDebugValue = doDebug;
-  let globalKeywordsValue = globalKeywords;
-  let ruleSetValue = ruleSet;
 
   // ---------------------------------------------------------------------------------
   if (doDebugStoreValue && doDebugStoreValue[pathDebug]) {
@@ -134,23 +132,27 @@ async function loadSettings () {
   doDebug = doDebugValue === true;
 
   // ---------------------------------------------------------------------------------
-  if (globalKeywordsStoreValue && globalKeywordsStoreValue[pathGlobalKeywords]) {
-    globalKeywordsValue = globalKeywordsStoreValue[pathGlobalKeywords];
+  if (globalKeywordsStoreValue && Object.hasOwn(globalKeywordsStoreValue, pathGlobalKeywords)) {
+    globalKeywords = globalKeywords.concat(globalKeywordsStoreValue[pathGlobalKeywords]);
   }
-
-  globalKeywords = globalKeywordsValue;
 
   // ---------------------------------------------------------------------------------
-  if (ruleSetStoreValue && ruleSetStoreValue[pathRuleSet]) {
-    ruleSetValue = ruleSetStoreValue[pathRuleSet];
-  }
-
-  ruleSet = ruleSetValue;
-
   // Merge base ruleset with user definitions
-  for (const key of Object.keys(baseRuleSet)) {
-    ruleSet[key] = baseRuleSet[key];
+  ruleSet = baseRuleSet;
+  if (ruleSetStoreValue && Object.hasOwn(ruleSetStoreValue, pathRuleSet)) {
+    const rule = ruleSetStoreValue[pathRuleSet];
+    for (const url of Object.keys(rule)) {
+      const merged = Object.assign({}, baseRuleSet[url], rule[url]);
+      ruleSet[url] = merged;
+    }
   }
+
+  // ---------------------------------------------------------------------------------
+  controlUrlRuleList.appendChild(createSelectOption('', 'No selection', true, false));
+  for (const key of Object.keys(ruleSet)) {
+    controlUrlRuleList.appendChild(createSelectOption(key, key, false, false));
+  }
+
   // ---------------------------------------------------------------------------------
 
   if (doDebug) {
@@ -201,6 +203,7 @@ const navSettings = document.querySelector('#navigation a[href="#settings"]');
 const controlSearchRules = document.getElementById('searchRules');
 const controlClearSearchRule = document.getElementById('clearSearchRule');
 const controlSearchDeleteRule = document.getElementById('searchDeleteRule');
+const controlUrlRuleList = document.getElementById('urlRuleList');
 const ruleHitList = document.getElementById('ruleHits');
 const controlNewURLRuleAction = document.getElementById('newURLRuleAction');
 // ---------------------------------------------------
@@ -251,9 +254,29 @@ controlSaveAll.addEventListener('click', function (evt) {
   const excludes = controlExcludes.value.trim().split('\n');
   const replaceElements = controlReplaceElements.value === 'true';
 
+  const resultKeywords = [];
+  for (let item of keywords) {
+    item = item.trim();
+    if (resultKeywords.indexOf(item) === -1) {
+      resultKeywords.push(item);
+    }
+  }
+
+  controlKeywords.value = resultKeywords.join('\n');
+
+  const resultExcludes = [];
+  for (let item of excludes) {
+    item = item.trim();
+    if (resultExcludes.indexOf(item) === -1) {
+      resultExcludes.push(item);
+    }
+  }
+
+  controlExcludes.value = resultExcludes.join('\n');
+
   newCreatedRuleDictionary[targetURL] = {};
-  newCreatedRuleDictionary[targetURL].keywords = keywords;
-  newCreatedRuleDictionary[targetURL].excludes = excludes;
+  newCreatedRuleDictionary[targetURL].keywords = resultKeywords;
+  newCreatedRuleDictionary[targetURL].excludes = resultExcludes;
 
   const elementContainersRules = {};
   const elementContainersOptions = controlElementContainers.options;
@@ -453,6 +476,7 @@ function initUI () {
   controlSearchRules.addEventListener('keyup', searchRules);
   controlClearSearchRule.addEventListener('click', clearSearchRule);
   controlSearchDeleteRule.addEventListener('click', deleteRule);
+  controlUrlRuleList.addEventListener('change', fillRuleBySearchSelection);
 
   // ---------------------------------------------------------------------------------------
   controlKeywords.addEventListener('keyup', hasFormDataChanged);
@@ -731,11 +755,20 @@ function initUI () {
   });
 
   controlSaveGlobalKeywords.addEventListener('click', function (evt) {
-    const value = controlGlobalKeywords.value.trim().split('\n');
+    const keywords = controlGlobalKeywords.value.trim().split('\n');
 
-    if (saveSetting(pathGlobalKeywords, value)) {
-      setDataValue(controlGlobalKeywords, originalValueStore, value);
+    const resultKeywords = [];
+    for (let item of keywords) {
+      item = item.trim();
+      if (resultKeywords.indexOf(item) === -1) {
+        resultKeywords.push(item);
+      }
+    }
+
+    if (saveSetting(pathGlobalKeywords, resultKeywords)) {
+      setDataValue(controlGlobalKeywords, originalValueStore, resultKeywords);
       setDisableState(controlSaveGlobalKeywords, true);
+      controlGlobalKeywords.value = resultKeywords.join('\n');
     }
   });
 
@@ -865,6 +898,7 @@ function searchRules (evt) {
     ruleHitList.style.visibility = 'hidden';
     ruleHitList.replaceChildren();
 
+    controlUrlRuleList.value = '';
     controlNewURLRuleAction.value = getDatasetValue(controlNewURLRuleAction, originalValueStore);
     setDisableState(controlSearchDeleteRule, true);
 
@@ -919,6 +953,7 @@ function searchRules (evt) {
       setDisableState(controlClearSearchRule, false);
       setDisableState(controlSearchDeleteRule, true);
       controlNewURLRuleAction.value = `Adding a new rule for: ${searchValue}`;
+      controlUrlRuleList.value = '';
     } else if (hasExactHit) {
       clearExpanderValue(evt.target);
 
@@ -966,10 +1001,37 @@ function searchRules (evt) {
 }
 
 // ---------------------------------------------------------------------------------------
+function fillRuleBySearchSelection (evt) {
+  if (!evt.target.value) {
+    clearSearchRule();
+    return;
+  }
+
+  const domainName = evt.target.options[evt.target.selectedIndex].value;
+
+  controlSearchRules.value = domainName;
+  controlUrlRuleList.value = controlSearchRules.value;
+  controlNewURLRuleAction.value = `Edit rule: ${controlSearchRules.value}`;
+  setDisableState(controlSearchDeleteRule, false);
+  setDisableState(controlClearSearchRule, false);
+
+  enabledNavItem(navKeywords);
+  enabledNavItem(navExcludes);
+  enabledNavItem(navElementContainers);
+  enabledNavItem(navReplaceElements);
+
+  clearExpanderValue(controlSearchRules);
+
+  clearRuleValues();
+  setRuleValues(domainName);
+}
+
+// ---------------------------------------------------------------------------------------
 function setRuleFromSearch (evt) {
   controlSearchRules.value = evt.target.textContent.trim();
 
   ruleHitList.style.visibility = 'hidden';
+  controlUrlRuleList.value = controlSearchRules.value;
   controlNewURLRuleAction.value = `Edit rule: ${controlSearchRules.value}`;
   setDisableState(controlSearchDeleteRule, false);
   setDisableState(controlClearSearchRule, false);
@@ -994,6 +1056,14 @@ function deleteRule (evt) {
 
     delete ruleSet[ruleValue];
 
+    // ---------------------------------------------------------------------------------
+    for (const option of controlUrlRuleList.options) {
+      if (option.value === ruleValue) {
+        controlUrlRuleList.removeChild(option);
+        break;
+      }
+    }
+
     saveSetting(pathRuleSet, ruleSet);
     window.alert('Rule \'' + ruleValue + '\' succesfully removed.');
   }
@@ -1001,6 +1071,7 @@ function deleteRule (evt) {
 
 // ---------------------------------------------------------------------------------------
 function clearSearchRule () {
+  controlUrlRuleList.value = '';
   controlSearchRules.value = '';
   ruleHitList.style.visibility = 'hidden';
 
