@@ -31,10 +31,16 @@
                     <div class="actionItem" id="url-section">
                         <h2 class="title">URL</h2>
                         <div class="multiContainer">
+                            <label class="subTitle">Existing rules:</label>
+                            <div>
+                                <select id="urlRuleList" name="urlRuleList" title="Existing url/domain rules"></select>
+                            </div>
+
                             <div class="expand-input" data-value="">
                                 <input type="text" id="searchRules" value="" name="searchRules" placeholder="Search existing rules or add new URL rule." title="Use the URL or URL parts like --> www.dwrox.net OR dwrox.net">
-                                <ul id="ruleHits"></ul>
                             </div>
+                            <ul id="ruleHits"></ul>
+
                             <div class="buttonActions">
                                 <button type="button" id="searchDeleteRule" title="Remove this rule" autocomplete="off" disabled="disabled">Remove</button>
                                 <div class="right-actions">
