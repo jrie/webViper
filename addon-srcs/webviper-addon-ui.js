@@ -257,6 +257,11 @@ controlSaveAll.addEventListener('click', function (evt) {
   const resultKeywords = [];
   for (let item of keywords) {
     item = item.trim();
+
+    if (item.length === 0) {
+      continue;
+    }
+
     if (resultKeywords.indexOf(item) === -1) {
       resultKeywords.push(item);
     }
@@ -267,6 +272,10 @@ controlSaveAll.addEventListener('click', function (evt) {
   const resultExcludes = [];
   for (let item of excludes) {
     item = item.trim();
+
+    if (item.length === 0) {
+      continue;
+    }
     if (resultExcludes.indexOf(item) === -1) {
       resultExcludes.push(item);
     }
