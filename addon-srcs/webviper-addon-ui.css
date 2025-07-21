@@ -216,6 +216,7 @@ button:disabled {
   z-index: 0;
   display: inline;
 }
+
 .actionItem .expand-input::after {
   content: attr(data-value);
   position: absolute;
@@ -241,7 +242,8 @@ button:disabled {
 
 .actionItem ul {
   list-style: none;
-  background-color: rgba(34, 68, 34, 0.8);
+  /*background-color: rgba(34, 68, 34, 0.8);*/
+  background-color: rgba(34, 68, 34, 0.93);
   color: #ccc;
   font-weight: normal;
   border: 0;
@@ -259,6 +261,12 @@ button:disabled {
   height: auto;
   width: 100%;
   padding: 0;
+}
+
+#ruleHits {
+  position: absolute;
+  top: 228px;
+  width: 393px;
 }
 
 .actionItem ul li {
