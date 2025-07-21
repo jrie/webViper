@@ -112,8 +112,6 @@ async function loadSettings () {
 
   // ---------------------------------------------------------------------------------
   let doDebugValue = doDebug;
-  let globalKeywordsValue = globalKeywords;
-  let ruleSetValue = ruleSet;
 
   // ---------------------------------------------------------------------------------
   if (doDebugStoreValue && doDebugStoreValue[pathDebug]) {
@@ -123,24 +121,19 @@ async function loadSettings () {
   doDebug = doDebugValue === true;
 
   // ---------------------------------------------------------------------------------
-  if (globalKeywordsStoreValue && globalKeywordsStoreValue[pathGlobalKeywords]) {
-    globalKeywordsValue = globalKeywordsStoreValue[pathGlobalKeywords];
-  }
-
-  if (globalKeywordsValue.length >= 1 && globalKeywordsValue[0] !== '') {
-    globalKeywords = globalKeywordsValue;
+  if (globalKeywordsStoreValue && Object.hasOwn(globalKeywordsStoreValue, pathGlobalKeywords)) {
+    globalKeywords = globalKeywords.concat(globalKeywordsStoreValue[pathGlobalKeywords]);
   }
 
   // ---------------------------------------------------------------------------------
-  if (ruleSetStoreValue && ruleSetStoreValue[pathRuleSet]) {
-    ruleSetValue = ruleSetStoreValue[pathRuleSet];
-  }
-
-  ruleSet = ruleSetValue;
-
   // Merge base ruleset with user definitions
-  for (const key of Object.keys(baseRuleSet)) {
-    ruleSet[key] = baseRuleSet[key];
+  ruleSet = baseRuleSet;
+  if (ruleSetStoreValue && Object.hasOwn(ruleSetStoreValue, pathRuleSet)) {
+    const rule = ruleSetStoreValue[pathRuleSet];
+    for (const url of Object.keys(rule)) {
+      const merged = Object.assign({}, baseRuleSet[url], rule[url]);
+      ruleSet[url] = merged;
+    }
   }
   // ---------------------------------------------------------------------------------
 
