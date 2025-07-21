@@ -54,5 +54,10 @@
       "resources": ["/addon-srcs/*"],
       "matches": []
     }
-  ]
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "webviper@dwrox.net"
+    }
+  }
 }
