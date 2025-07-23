@@ -463,7 +463,11 @@ function initUI () {
       if (controlsInView.length !== 0 && !focusTimeOut) {
         focusTimeOut = true;
         window.setTimeout(function () {
-          controlsInView[0].focus();
+          if (!useChrome) {
+            // Do not focus in chrome, this will stop the animation for whatever reasons.
+            controlsInView[0].focus();
+          }
+
           focusTimeOut = false;
         }, 330);
       }

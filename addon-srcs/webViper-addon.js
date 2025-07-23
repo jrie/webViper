@@ -145,7 +145,7 @@ async function loadSettings () {
 
 function applyParsing () {
   // -----------------------------------------------------------------------------------
-  const currentPageLocation = window.location.href.toLocaleLowerCase();
+  const currentPageLocation = location.href.toLocaleLowerCase();
   const outputConsole = doDebug ? console.debug : console.log;
 
   // -----------------------------------------------------------------------------------
