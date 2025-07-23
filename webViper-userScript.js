@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         webViper
 // @namespace    webViper
-// @version      2025-01-28
+// @version      2025-07-23
 // @description  vipe the web, like a pro, using the webViper
 // @author       Jan Riechers
 // @match        http*://*/
@@ -20,7 +20,7 @@ const doDebug = false;
 // -----------------------------------------------------------------------------------
 // webpage rules start
 // -----------------------------------------------------------------------------------
-const ruleSet = {
+const baseRuleSet = {
   'www.bild.de': {
     keywords: [
 
@@ -202,7 +202,7 @@ if (doDebug) {
 outputConsole('[webViper] [ RUN ] Start.');
 
 const removedByKeywords = {};
-for (const url of Object.keys(ruleSet)) {
+for (const url of Object.keys(baseRuleSet)) {
   if (currentPageLocation.indexOf(url) > -1) {
     outputConsole('[webViper] [ RUN ] Rule matched for: ' + url);
 
@@ -214,26 +214,26 @@ for (const url of Object.keys(ruleSet)) {
     let targetHasExcludes = false;
     let targetRemove = false;
 
-    if (Object.hasOwn(ruleSet, 'globalKeywords')) {
-      globalKeywords = ruleSet.globalKeywords;
+    if (Object.hasOwn(baseRuleSet, 'globalKeywords')) {
+      globalKeywords = baseRuleSet.globalKeywords;
     }
 
-    if (Object.hasOwn(ruleSet[targetUrl], 'keywords')) {
-      targetKeywords = ruleSet[targetUrl].keywords;
+    if (Object.hasOwn(baseRuleSet[targetUrl], 'keywords')) {
+      targetKeywords = baseRuleSet[targetUrl].keywords;
     }
 
-    if (Object.hasOwn(ruleSet[targetUrl], 'elementContainers')) {
-      targetContainers = ruleSet[targetUrl].elementContainers;
+    if (Object.hasOwn(baseRuleSet[targetUrl], 'elementContainers')) {
+      targetContainers = baseRuleSet[targetUrl].elementContainers;
     }
 
-    if (Object.hasOwn(ruleSet[targetUrl], 'excludes')) {
-      if (ruleSet[targetUrl].excludes.length !== 0) {
-        targetExcludes = ruleSet[targetUrl].excludes;
+    if (Object.hasOwn(baseRuleSet[targetUrl], 'excludes')) {
+      if (baseRuleSet[targetUrl].excludes.length !== 0) {
+        targetExcludes = baseRuleSet[targetUrl].excludes;
         targetHasExcludes = true;
       }
     }
 
-    if (Object.hasOwn(ruleSet[targetUrl], 'removeElement') && ruleSet[targetUrl].removeElement) {
+    if (Object.hasOwn(baseRuleSet[targetUrl], 'removeElement') && baseRuleSet[targetUrl].removeElement) {
       targetRemove = true;
     }
 
