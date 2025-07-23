@@ -3,7 +3,7 @@
 // for easier addition, just fill to get started..
 //
 //
-// const ruleSet = {
+// const baseRuleSet = {
 //
     'websiteURL.net': {
         keywords: [
