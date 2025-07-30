@@ -1,28 +1,25 @@
 # webViper
 
-vipe the web using the webViper!
-
-## webViper in short
-*webViper* is a highly configureable element removal/cleaner for the web.
-
 ![teaser-stores-640x400](https://github.com/user-attachments/assets/0087ef71-9ce6-43bf-b38f-f65b427f8c99)
 
+## webViper in short
+webViper a versatile, and easy to use web cleaner based on rule sets. There are example rules for German news websites.
+Filter rules and keywords can be set for each website individually. Global keywords can be used for all website defined rules.
 
-## Usage options for the viper
-- *webViper-userScript.js* for usage with a browser "userscript"-addons like *Tampermonkey*, *Violentmonkey* (currently recommended!)
-
-- *webViper* in the folder `addon-srcs` to load as temporary addon/extension in Firefox `about:debugging`, `This Firefox` and `Load temporary extension`.
-This is only for testing the UI for now, but rules, keywords and entered details are already applied, as long as the extension is installed.
-Since there is no export, it is recommended to try out the UI, but do not enter a lot of information, those would be lost on uninstall/removal.
-
+## Usage options
+- as experimental *addon* for [Firefox](https://addons.mozilla.org/en-US/firefox/addon/webviper/)
+- *webViper-userScript.js* for usage with a browser "userscript"-addons like *Tampermonkey*, *Violentmonkey*
 
 ## Screenshot of a wiped item
 ![screenshot_webviper_removed_item](https://github.com/user-attachments/assets/3479e800-1974-41cb-ad19-dd12c22c0917)
 
 
 ## Filter rules, how to get clearing out working
+There are example rules for: "www.bild.de", "www.focus.de", "www.spiegel.de", "www.stern.de", or "www.taz.de".
 *webViper* sources have comments, but to make things easy, here they are.
-The definition for a website is in `const ruleSet = { ... }`, here a example:
+
+
+The definition for a website is in `const ruleSet = { ... }`, here an example:
 
 ```javascript
 //
@@ -62,8 +59,8 @@ The definition for a website is in `const ruleSet = { ... }`, here a example:
 //
 ```
 
-### Rule template
-For easier editing, the file `webViper-rule-template.js` contains a basic template for easy copy and paste into the userscript and script file.
+### Rule template for usage as userscript
+For easier editing, the file `webViper-rule-template.js` contains a basic template for easy copy and paste into the userscript.
 
 
 ## Video guide on how to add new rules
