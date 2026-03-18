@@ -3,100 +3,102 @@
 // @version      2026-03-18
 // @description  vipe the web, like a pro, using the webViper
 // @author       Jan Riechers
-// @match        *://*/
-// @run-at       document-end
-// @supportURL   https://github.com/jrie/webViper
+// @match        *://*/*
 // @grant        none
+// @run-at       document-idle
+// @website      https://webviper.dwrox.net
+// @downloadURL  https://github.com/jrie/webViper
+// @supportURL   https://github.com/jrie/webViper/issues
 // ==/UserScript==
 
 // -----------------------------------------------------------------------------------
 // Small config
+// -----------------------------------------------------------------------------------
 // This will output some more information to debug console if enabled
 // otherwise only log console statements are used
-const doDebug = false
-
+let doDebug = false;
 // -----------------------------------------------------------------------------------
 // webpage rules start
 // -----------------------------------------------------------------------------------
-const baseRuleSet = {
-  'gog.com': {
-    keywords: ['in library'],
+let baseRuleSet = {
+  "gog.com": {
+    keywords: ["in library"],
     excludes: [],
     removeElement: true,
     elementContainers: {
-      'span.product-label__text': [
-        'div.swiper-slide-visible',
-        'a.product-tile--list',
-        'product-tile'
-      ]
-    }
+      "span.product-label__text": [
+        "div.swiper-slide-visible",
+        "a.product-tile--list",
+        "product-tile",
+      ],
+    },
   },
-  globalKeywords: []
-}
+  globalKeywords: [],
+};
 // -----------------------------------------------------------------------------------
 // webpage rules end - stop editing here
 // -----------------------------------------------------------------------------------
 
 // -----------------------------------------------------------------------------------
-const currentPageLocation = location.href.toLocaleLowerCase()
-const outputConsole = doDebug ? console.debug : console.log
+let currentPageLocation = location.href.toLocaleLowerCase();
+let outputConsole = doDebug ? console.debug : console.log;
 
 // -----------------------------------------------------------------------------------
-function replaceElement (keyword, toReplace) {
+function replaceElement(keyword, toReplace) {
   if (toReplace.parentNode) {
-    const keyword = 'webViper'
+    const keyword = "webViper";
     const replacement = document.createElement(
-      toReplace.nodeName.toLocaleLowerCase()
-    )
-    replacement.className = toReplace.className + ' vipered'
-    replacement.style.textAlign = 'left'
-    replacement.style.padding = '1.5vw 1.2vw'
+      toReplace.nodeName.toLocaleLowerCase(),
+    );
+    replacement.className = toReplace.className + " vipered";
+    replacement.style.textAlign = "left";
+    replacement.style.padding = "1.5vw 1.2vw";
     replacement.innerHTML =
       '<span style="color: #666;">This item was viped by <br><span style="color: red; font-weight: bold; font-size: 1.65vw;">' +
       keyword +
-      '</span></span>'
-    toReplace.parentNode.replaceChild(replacement, toReplace)
-    return true
+      "</span></span>";
+    toReplace.parentNode.replaceChild(replacement, toReplace);
+    return true;
   }
 
-  return false
+  return false;
 }
 
 // -----------------------------------------------------------------------------------
-function createKeywordsRemovalDict (keyWordDict, keywordArray) {
+function createKeywordsRemovalDict(keyWordDict, keywordArray) {
   for (const keyword of keywordArray) {
     if (!Object.hasOwn(keyWordDict, keyword)) {
-      keyWordDict[keyword] = 0
+      keyWordDict[keyword] = 0;
     }
   }
 }
 
 // -----------------------------------------------------------------------------------
-function doParse (
+function doParse(
   removedByKeywords,
   targetContainers,
   targetExcludes,
   targetHasExcludes,
-  targetRemove
+  targetRemove,
 ) {
   for (const containerKey of Object.keys(targetContainers)) {
-    const targets = document.querySelectorAll(containerKey)
+    const targets = document.querySelectorAll(containerKey);
     if (targets.length === 0) {
       outputConsole(
         "[webViper] [ RUN ] [ PARSE ] No 'targets' found for selector: '" +
-          containerKey +
-          "'"
-      )
-      continue
+        containerKey +
+        "'",
+      );
+      continue;
     }
 
-    let excludeCount = 0
+    let excludeCount = 0;
     for (const nodeElement of targets) {
-      let parentContainer = null
+      let parentContainer = null;
       for (const nodeElmentParentContainer of targetContainers[containerKey]) {
-        parentContainer = nodeElement.closest(nodeElmentParentContainer)
+        parentContainer = nodeElement.closest(nodeElmentParentContainer);
         if (parentContainer) {
-          break
+          break;
         }
       }
 
@@ -104,40 +106,40 @@ function doParse (
         if (doDebug) {
           outputConsole(
             "[webViper] [ DEBUG ] [ PARSE ] No 'parentContainer' found for selector: '" +
-              containerKey +
-              "'"
-          )
+            containerKey +
+            "'",
+          );
         }
 
-        continue
+        continue;
       }
 
-      const data = parentContainer.innerHTML.toLocaleLowerCase()
+      const data = parentContainer.innerHTML.toLocaleLowerCase();
 
-      let hasExclude = false
+      let hasExclude = false;
       if (targetHasExcludes) {
         for (const exclude of targetExcludes) {
           if (data.indexOf(exclude) > -1) {
-            hasExclude = true
-            ++excludeCount
-            break
+            hasExclude = true;
+            ++excludeCount;
+            break;
           }
         }
 
         if (hasExclude) {
-          continue
+          continue;
         }
       }
 
       if (targetRemove) {
         for (const keyword of Object.keys(removedByKeywords)) {
-          const keywordLower = keyword.toLocaleLowerCase()
+          const keywordLower = keyword.toLocaleLowerCase();
           if (data.indexOf(keywordLower) > -1) {
             if (replaceElement(keyword, parentContainer)) {
-              ++removedByKeywords[keyword]
+              ++removedByKeywords[keyword];
             }
 
-            break
+            break;
           }
         }
       }
@@ -146,10 +148,10 @@ function doParse (
     if (excludeCount !== 0) {
       outputConsole(
         "[webViper] [ RUN ] [ PARSE ] Excluded for '" +
-          containerKey +
-          "' --->" +
-          excludeCount
-      )
+        containerKey +
+        "' --->" +
+        excludeCount,
+      );
     }
   }
 }
@@ -157,103 +159,143 @@ function doParse (
 // -----------------------------------------------------------------------------------
 if (doDebug) {
   outputConsole(
-    '[webViper] [ DEBUG START ] -----------------------------------'
-  )
+    "[webViper] [ DEBUG START ] -----------------------------------",
+  );
 }
 
-outputConsole('[webViper] [ RUN ] Start.')
+function doVipe() {
+  outputConsole("[webViper] [ RUN ] Start.");
 
-const removedByKeywords = {}
-for (const url of Object.keys(baseRuleSet)) {
-  if (currentPageLocation.indexOf(url) > -1) {
-    outputConsole('[webViper] [ RUN ] Rule matched for: ' + url)
+  const removedByKeywords = {};
+  for (const url of Object.keys(baseRuleSet)) {
+    if (currentPageLocation.indexOf(url) > -1) {
+      outputConsole("[webViper] [ RUN ] Rule matched for: " + url);
 
-    const targetUrl = url
-    let globalKeywords = []
-    let targetKeywords = []
-    let targetContainers = {}
-    let targetExcludes = []
-    let targetHasExcludes = false
-    let targetRemove = false
+      const targetUrl = url;
+      let globalKeywords = [];
+      let targetKeywords = [];
+      let targetContainers = {};
+      let targetExcludes = [];
+      let targetHasExcludes = false;
+      let targetRemove = false;
 
-    if (Object.hasOwn(baseRuleSet, 'globalKeywords')) {
-      globalKeywords = baseRuleSet.globalKeywords
-    }
-
-    if (Object.hasOwn(baseRuleSet[targetUrl], 'keywords')) {
-      targetKeywords = baseRuleSet[targetUrl].keywords
-    }
-
-    if (Object.hasOwn(baseRuleSet[targetUrl], 'elementContainers')) {
-      targetContainers = baseRuleSet[targetUrl].elementContainers
-    }
-
-    if (Object.hasOwn(baseRuleSet[targetUrl], 'excludes')) {
-      if (baseRuleSet[targetUrl].excludes.length !== 0) {
-        targetExcludes = baseRuleSet[targetUrl].excludes
-        targetHasExcludes = true
+      if (Object.hasOwn(baseRuleSet, "globalKeywords")) {
+        globalKeywords = baseRuleSet.globalKeywords;
       }
+
+      if (Object.hasOwn(baseRuleSet[targetUrl], "keywords")) {
+        targetKeywords = baseRuleSet[targetUrl].keywords;
+      }
+
+      if (Object.hasOwn(baseRuleSet[targetUrl], "elementContainers")) {
+        targetContainers = baseRuleSet[targetUrl].elementContainers;
+      }
+
+      if (Object.hasOwn(baseRuleSet[targetUrl], "excludes")) {
+        if (baseRuleSet[targetUrl].excludes.length !== 0) {
+          targetExcludes = baseRuleSet[targetUrl].excludes;
+          targetHasExcludes = true;
+        }
+      }
+
+      if (
+        Object.hasOwn(baseRuleSet[targetUrl], "removeElement") &&
+        baseRuleSet[targetUrl].removeElement
+      ) {
+        targetRemove = true;
+      }
+
+      if (doDebug) {
+        outputConsole(
+          "[webViper] [ DEBUG ] global keywords    : ",
+          globalKeywords,
+        );
+        outputConsole("[webViper] [ DEBUG ] rule               : ", targetUrl);
+        outputConsole(
+          "[webViper] [ DEBUG ] keywords           : ",
+          targetKeywords,
+        );
+        outputConsole(
+          "[webViper] [ DEBUG ] elementContainers  : ",
+          targetContainers,
+        );
+        outputConsole(
+          "[webViper] [ DEBUG ] excludes           : ",
+          targetExcludes,
+        );
+      }
+
+      createKeywordsRemovalDict(removedByKeywords, globalKeywords);
+      createKeywordsRemovalDict(removedByKeywords, targetKeywords);
+
+      doParse(
+        removedByKeywords,
+        targetContainers,
+        targetExcludes,
+        targetHasExcludes,
+        targetRemove,
+      );
+      break;
     }
-
-    if (
-      Object.hasOwn(baseRuleSet[targetUrl], 'removeElement') &&
-      baseRuleSet[targetUrl].removeElement
-    ) {
-      targetRemove = true
-    }
-
-    if (doDebug) {
-      outputConsole(
-        '[webViper] [ DEBUG ] global keywords    : ',
-        globalKeywords
-      )
-      outputConsole('[webViper] [ DEBUG ] rule               : ', targetUrl)
-      outputConsole(
-        '[webViper] [ DEBUG ] keywords           : ',
-        targetKeywords
-      )
-      outputConsole(
-        '[webViper] [ DEBUG ] elementContainers  : ',
-        targetContainers
-      )
-      outputConsole(
-        '[webViper] [ DEBUG ] excludes           : ',
-        targetExcludes
-      )
-    }
-
-    createKeywordsRemovalDict(removedByKeywords, globalKeywords)
-    createKeywordsRemovalDict(removedByKeywords, targetKeywords)
-
-    doParse(
-      removedByKeywords,
-      targetContainers,
-      targetExcludes,
-      targetHasExcludes,
-      targetRemove
-    )
-    break
   }
-}
 
-let vipedByViper = 0
-for (const key of Object.keys(removedByKeywords)) {
-  const amount = removedByKeywords[key]
-  if (amount > 0) {
-    outputConsole(
-      '[webViper] Removed for keyword  : ' + key + ' ----> ' + amount
-    )
-    vipedByViper += amount
+  let vipedByViper = 0;
+  for (const key of Object.keys(removedByKeywords)) {
+    const amount = removedByKeywords[key];
+    if (amount > 0) {
+      outputConsole(
+        "[webViper] Removed for keyword  : " + key + " ----> " + amount,
+      );
+      vipedByViper += amount;
+    }
   }
-}
 
-outputConsole(
-  '[webViper] [ RUN ] Run end.' +
-    (vipedByViper !== 0 ? ' Viped items: ' + vipedByViper : ' No viped items.')
-)
-
-if (doDebug) {
   outputConsole(
-    '[webViper] [ DEBUG END ] -------------------------------------'
-  )
+    "[webViper] [ RUN ] Run end." +
+    (vipedByViper !== 0
+      ? " Viped items: " + vipedByViper
+      : " No viped items."),
+  );
+
+  if (doDebug) {
+    outputConsole(
+      "[webViper] [ DEBUG END ] -------------------------------------",
+    );
+  }
 }
+
+let hasChange = true;
+let vipeStarted = false;
+let pageloadCheckTimer = null;
+
+function resetLoad() {
+  if (!hasChange) {
+    vipeStarted = true;
+    clearInterval(pageloadCheckTimer);
+    doVipe();
+    return;
+  }
+
+  hasChange = false;
+}
+
+function checkLoad() {
+  if (vipeStarted) {
+    return;
+  }
+
+  hasChange = true;
+  if (pageloadCheckTimer) {
+    return
+  }
+
+  pageloadCheckTimer = setInterval(resetLoad, 2000);
+}
+
+const observer = new window.MutationObserver(checkLoad);
+const observerConfig = {
+  childList: true
+};
+
+// Lets get the party started!
+observer.observe(document.body, observerConfig);
