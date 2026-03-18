@@ -8,24 +8,21 @@ Filter rules and keywords can be set for each website individually. Global keywo
 
 ## Usage options
 - as experimental *addon* for [Firefox](https://addons.mozilla.org/en-US/firefox/addon/webviper/)
-- *webViper-userScript.js* for usage with a browser "userscript"-addons like *Tampermonkey*, *Violentmonkey*
+- *webViper-userScript.js* for usage with a browser "userscript"-addons like *Tampermonkey*, *Violentmonkey* or if you prfer *Firemonkey"*
 
 ## Screenshot of a wiped item
 ![screenshot_webviper_removed_item](https://github.com/user-attachments/assets/3479e800-1974-41cb-ad19-dd12c22c0917)
 
 
 ## Filter rules, how to get clearing out working
-There are example rules for: "www.bild.de", "www.focus.de", "www.spiegel.de", "www.stern.de", or "www.taz.de".
-*webViper* sources have comments, but to make things easy, here they are.
 
-
-The definition for a website is in `const ruleSet = { ... }`, here an example:
+The definition for a website is in `const baseRuleSet = { ... }`, here an example:
 
 ```javascript
 //
 // Small config rules inside "ruleSet"
 //
-// const ruleSet = {
+// const baseRuleSet = {
 //
     // A url which identifies the website
     'websiteURL.net': {
@@ -61,13 +58,6 @@ The definition for a website is in `const ruleSet = { ... }`, here an example:
 
 ### Rule template for usage as userscript
 For easier editing, the file `webViper-rule-template.js` contains a basic template for easy copy and paste into the userscript.
-
-
-## Video guide on how to add new rules
-A video demonstration how to add and extend the `ruleSet` rules and identify a cleaning item.
-
-https://github.com/user-attachments/assets/6d8ade11-f793-46f5-a692-fbe1cdf35888
-
 
 ## Help, support and issues or bugs
 Please create a issue, with the ***website url*** and the ***keyword(s)*** which you want to be viped out.
