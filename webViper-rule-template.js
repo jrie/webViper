@@ -2,25 +2,25 @@
 // Rule template for "webViper" --> https://github.com/jrie/webViper
 // for easier addition, just fill to get started..
 //
-//
-// const baseRuleSet = {
-//
-    'websiteURL.net': {
-        keywords: [
-            // 'keyword1',
-            // 'keyword2',
-        ],
-        excludes: [
-            // Can be empty
-            // 'string1',
-            // 'string2'
-        ],
-        elementContainers: {
-            //CSSselector1: ['cssSelectorParent1', 'cssSelectorParent2'],
-            //CSSselector2: ['cssSelectorParent1', 'cssSelectorParent2']
-        },
-        removeElement: true
-    }
-//
-// }
-//
+// -----------------------------------------------------------------------------------
+// webpage rules start
+// -----------------------------------------------------------------------------------
+let baseRuleSet = {
+  // Start adding changes in here
+  "gog.com": {
+    keywords: ["in library", "in der bibliothek"],
+    excludes: [],
+    removeElement: true,
+    elementContainers: {
+      "span.product-label__text": [
+        ".swiper-slide:has(big-spot)",
+        "products-section-layout ~ a.product-tile",
+        "product-tile:has(store-picture)",
+      ],
+    },
+  },
+  globalKeywords: [],
+};
+// -----------------------------------------------------------------------------------
+// webpage rules end - stop editing here
+// -----------------------------------------------------------------------------------
