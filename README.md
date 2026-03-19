@@ -8,11 +8,7 @@ Filter rules and keywords can be set for each website individually. Global keywo
 
 ## Usage options
 - as experimental *addon* for [Firefox](https://addons.mozilla.org/en-US/firefox/addon/webviper/)
-- *webViper-userScript.js* for usage with a browser "userscript"-addons like *Tampermonkey*, *Violentmonkey* or if you prfer *Firemonkey"*
-
-## Screenshot of a wiped item
-![screenshot_webviper_removed_item](https://github.com/user-attachments/assets/3479e800-1974-41cb-ad19-dd12c22c0917)
-
+- *webViper-userScript.js* for usage with a browser "userscript"-addons like *Firemonkey* user script and css manager
 
 ## Filter rules, how to get clearing out working
 
@@ -20,40 +16,31 @@ The definition for a website is in `const baseRuleSet = { ... }`, here an exampl
 
 ```javascript
 //
-// Small config rules inside "ruleSet"
+// Rule template for "webViper" --> https://github.com/jrie/webViper
+// for easier addition, just fill to get started..
 //
-// const baseRuleSet = {
-//
-    // A url which identifies the website
-    'websiteURL.net': {
-        keywords: [
-            // 'keyword1',
-            // 'keyword2',
-        ],
-        excludes: [
-            // Can be empty
-            // 'exlucde1',
-            // 'exlucde2'
-        ],
-        elementContainers: {
-            // CSSselector1: ['cssSelectorParent1', 'cssSelectorParent2'],
-            // CSSselector2: ['cssSelectorParent1', 'cssSelectorParent2']
-            //
-            // For example:
-            // a: ['article.stage-teaser', '.news-ticker-item'],
-            // 'a.stage-teaser__anchor': ['article.stage-teaser', '.news-ticker-item'],
-            // 'img.classNameClass': ['article.stage-teaser']
-            //
-            // You could also use:
-            // 'img#id': ['.className1', '#id']
-            // 'img.className': ['.className1', '#id']
-            //
-        },
-        removeElement: true
-    }
-//
-// }
-//
+// -----------------------------------------------------------------------------------
+// webpage rules start
+// -----------------------------------------------------------------------------------
+let baseRuleSet = {
+  // Start adding changes in here
+  "gog.com": {
+    keywords: ["in library", "in der bibliothek"],
+    excludes: [],
+    removeElement: true,
+    elementContainers: {
+      "span.product-label__text": [
+        ".swiper-slide:has(big-spot)",
+        "products-section-layout ~ a.product-tile",
+        "product-tile:has(store-picture)",
+      ],
+    },
+  },
+  globalKeywords: [],
+};
+// -----------------------------------------------------------------------------------
+// webpage rules end - stop editing here
+// -----------------------------------------------------------------------------------
 ```
 
 ### Rule template for usage as userscript
