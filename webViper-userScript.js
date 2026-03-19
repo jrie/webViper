@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         webViper
-// @version      2026-03-18
+// @version      2026-03-19
 // @description  vipe the web, like a pro, using the webViper
 // @author       Jan Riechers
 // @match        *://*/*
@@ -21,18 +21,20 @@ let doDebug = false;
 // webpage rules start
 // -----------------------------------------------------------------------------------
 let baseRuleSet = {
+  /*
   "gog.com": {
-    keywords: ["in library"],
+    keywords: ["in library", "in der bibliothek"],
     excludes: [],
     removeElement: true,
     elementContainers: {
       "span.product-label__text": [
-        "div.swiper-slide-visible",
-        "a.product-tile--list",
-        "product-tile",
+        ".swiper-slide:has(big-spot)",
+        "products-section-layout ~ a.product-tile",
+        "product-tile:has(store-picture)",
       ],
     },
   },
+  */
   globalKeywords: [],
 };
 // -----------------------------------------------------------------------------------
@@ -51,12 +53,25 @@ function replaceElement(keyword, toReplace) {
       toReplace.nodeName.toLocaleLowerCase(),
     );
     replacement.className = toReplace.className + " vipered";
+    replacement.id = toReplace.id;
+    replacement.style = toReplace.style;
     replacement.style.textAlign = "left";
     replacement.style.padding = "1.5vw 1.2vw";
+    replacement.style.width = toReplace.clientWidth
+      ? toReplace.clientWidth + "px"
+      : "auto";
+    replacement.style.height = toReplace.clientHeight
+      ? toReplace.clientHeight + "px"
+      : "auto";
+    replacement.style.position = "relative";
+    replacement.style.display = "inherit";
     replacement.innerHTML =
-      '<span style="color: #666;">This item was viped by <br><span style="color: red; font-weight: bold; font-size: 1.65vw;">' +
+      '<span style="color: #666; display: inline-block;">This item was viped by <br><span style="color: red; font-weight: bold; font-size: 1.65vw;">' +
       keyword +
       "</span></span>";
+
+    toReplace.parentNode.style.position = "relative";
+
     toReplace.parentNode.replaceChild(replacement, toReplace);
     return true;
   }
@@ -86,8 +101,8 @@ function doParse(
     if (targets.length === 0) {
       outputConsole(
         "[webViper] [ RUN ] [ PARSE ] No 'targets' found for selector: '" +
-        containerKey +
-        "'",
+          containerKey +
+          "'",
       );
       continue;
     }
@@ -106,8 +121,8 @@ function doParse(
         if (doDebug) {
           outputConsole(
             "[webViper] [ DEBUG ] [ PARSE ] No 'parentContainer' found for selector: '" +
-            containerKey +
-            "'",
+              containerKey +
+              "'",
           );
         }
 
@@ -148,9 +163,9 @@ function doParse(
     if (excludeCount !== 0) {
       outputConsole(
         "[webViper] [ RUN ] [ PARSE ] Excluded for '" +
-        containerKey +
-        "' --->" +
-        excludeCount,
+          containerKey +
+          "' --->" +
+          excludeCount,
       );
     }
   }
@@ -172,7 +187,7 @@ function doVipe() {
       outputConsole("[webViper] [ RUN ] Rule matched for: " + url);
 
       const targetUrl = url;
-      let globalKeywords = [];
+      let targetGlobalKeywords = [];
       let targetKeywords = [];
       let targetContainers = {};
       let targetExcludes = [];
@@ -180,7 +195,7 @@ function doVipe() {
       let targetRemove = false;
 
       if (Object.hasOwn(baseRuleSet, "globalKeywords")) {
-        globalKeywords = baseRuleSet.globalKeywords;
+        targetGlobalKeywords = baseRuleSet.globalKeywords;
       }
 
       if (Object.hasOwn(baseRuleSet[targetUrl], "keywords")) {
@@ -208,7 +223,7 @@ function doVipe() {
       if (doDebug) {
         outputConsole(
           "[webViper] [ DEBUG ] global keywords    : ",
-          globalKeywords,
+          targetGlobalKeywords,
         );
         outputConsole("[webViper] [ DEBUG ] rule               : ", targetUrl);
         outputConsole(
@@ -225,7 +240,7 @@ function doVipe() {
         );
       }
 
-      createKeywordsRemovalDict(removedByKeywords, globalKeywords);
+      createKeywordsRemovalDict(removedByKeywords, targetGlobalKeywords);
       createKeywordsRemovalDict(removedByKeywords, targetKeywords);
 
       doParse(
@@ -252,9 +267,9 @@ function doVipe() {
 
   outputConsole(
     "[webViper] [ RUN ] Run end." +
-    (vipedByViper !== 0
-      ? " Viped items: " + vipedByViper
-      : " No viped items."),
+      (vipedByViper !== 0
+        ? " Viped items: " + vipedByViper
+        : " No viped items."),
   );
 
   if (doDebug) {
@@ -286,16 +301,31 @@ function checkLoad() {
 
   hasChange = true;
   if (pageloadCheckTimer) {
-    return
+    return;
   }
 
   pageloadCheckTimer = setInterval(resetLoad, 2000);
 }
 
-const observer = new window.MutationObserver(checkLoad);
-const observerConfig = {
-  childList: true
-};
+function initObserver() {
+  for (const url of Object.keys(baseRuleSet)) {
+    if (currentPageLocation.indexOf(url) > -1) {
+      outputConsole(
+        "[webViper] [ RUN ] Rule found, starting observer for: " + url,
+      );
 
-// Lets get the party started!
-observer.observe(document.body, observerConfig);
+      const observer = new window.MutationObserver(checkLoad);
+      const observerConfig = {
+        subtree: true,
+        childList: true,
+      };
+
+      // Lets get the party started!
+      observer.observe(document.body, observerConfig);
+      break;
+    }
+  }
+}
+
+window.requestAnimationFrame(initObserver);
+window.requestAnimationFrame(checkLoad);
