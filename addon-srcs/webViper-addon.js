@@ -10,6 +10,7 @@ function scriptWrapper() {
   // -----------------------------------------------------------------------------------
   let baseRuleSet = {
     /*
+     // Start of a rule
     "gog.com": {
       keywords: ["in library", "in der bibliothek"],
       excludes: [],
@@ -21,7 +22,18 @@ function scriptWrapper() {
           "product-tile:has(store-picture)",
         ],
       },
+      // Very much experiemental, in short, clean viped elements:
+      // if element in observerContainers: "key" (css selector) change from [ "type", out of "(css) target"]
+      //
+      // What it does, call a clearing routine and also (re)attach mutation observers to the nodes.
+      observerContainers: {
+        // c => childList // THIS
+        // a => attributes // OR THIS
+        // s => subtree // Optional
+        ".paginated-products-grid.grid": ["c", "paginated-products-grid"],
+      }
     },
+    // End of a rule
     */
   };
 
@@ -30,13 +42,16 @@ function scriptWrapper() {
   // -----------------------------------------------------------------------------------
 
   // -----------------------------------------------------------------------------------
+  const currentPageLocation = location.href.toLocaleLowerCase();
+  const outputConsole = doDebug ? console.debug : console.log;
   const useChrome = typeof browser === "undefined";
-  const observer = new window.MutationObserver(checkLoad);
-  const observerConfig = {
-    subrtee: true,
-    childList: true,
+
+  const pageObserver = new window.MutationObserver(checkLoad);
+  const pageObserverConfig = {
+    attributes: true,
   };
 
+  let observerList = [];
   let globalKeywords = [];
   let ruleSet = {};
   let hasChange = true;
@@ -48,10 +63,6 @@ function scriptWrapper() {
   const pathDebug = "webviper-doDebug";
   const pathGlobalKeywords = "webviper-globalKeywords";
   const pathRuleSet = "webviper-ruleSet";
-
-  // -----------------------------------------------------------------------------------
-  const currentPageLocation = location.href.toLocaleLowerCase();
-  const outputConsole = doDebug ? console.debug : console.log;
 
   // -----------------------------------------------------------------------------------------
   // Load settings function
@@ -105,8 +116,8 @@ function scriptWrapper() {
     // ---------------------------------------------------------------------------------
 
     if (doDebug) {
-      console.debug("[webViper] [ INIT ] Do debug is set to " + doDebug);
-      console.debug("[webViper] [ INIT ] baseRuleSet: ", ruleSet);
+      outputConsole("[webViper] [ INIT ] Do debug is set to " + doDebug);
+      outputConsole("[webViper] [ INIT ] baseRuleSet: ", ruleSet);
     }
   }
 
@@ -254,6 +265,8 @@ function scriptWrapper() {
     );
   }
 
+  let currentPageTarget = "";
+
   function doVipe() {
     outputConsole("[webViper] [ RUN ] Start.");
 
@@ -358,16 +371,40 @@ function scriptWrapper() {
     }
   }
 
+  let obersersAttached = false;
+
   function resetLoad() {
     if (!hasChange) {
       clearInterval(pageloadCheckTimer);
+      pageloadCheckTimer = null;
 
-      observer.disconnect();
-      observer.takeRecords();
+      if (obersersAttached) {
+        pageObserver.disconnectAll();
+      }
+
+      // NOTE: Load attached observers after the page finished loading
+      if (!obersersAttached) {
+        obersersAttached = true;
+
+        let result = attachObservers(baseRuleSet[currentPageTarget]);
+        if (result && result !== false) {
+          outputConsole(
+            "[webViper] [ OBSERVER ] " +
+              result[0] +
+              " of " +
+              result[1] +
+              " observer(s) found and attached.",
+          );
+
+          if (doDebug) {
+            outputConsole("[webViper] [ OBSERVER ] List: ", observerList);
+          }
+        }
+      }
 
       doVipe();
-
-      observer.observe(document.body, observerConfig);
+      pageObserver.takeRecords();
+      pageObserver.reconnectAll();
       return;
     }
 
@@ -378,6 +415,204 @@ function scriptWrapper() {
     hasChange = true;
   }
 
+  function cleanUpViperedNodes(mutations, srcObserver) {
+    let srcNodeKey = srcObserver.getNodeKey();
+    let refreshedTarget = getRefreshedNode(srcNodeKey);
+    if (refreshedTarget) {
+      let nodeList = refreshedTarget.querySelectorAll(".vipered");
+      if (doDebug) {
+        outputConsole("nodeList", nodeList);
+      }
+
+      if (nodeList === null) {
+        return;
+      }
+
+      // Deactivate observer
+      pageObserver.disconnectAll();
+      //pageObserver.disconnect();
+
+      for (let node of nodeList) {
+        node.parentNode.removeChild(node);
+      }
+
+      // Reactivate page observer
+      pageObserver.reconnectAll();
+      //pageObserver.reconnect();
+
+      hasChange = true;
+      clearInterval(pageloadCheckTimer);
+      pageloadCheckTimer = null;
+      pageloadCheckTimer = setInterval(resetLoad, 1000);
+    } else {
+      if (doDebug) {
+        outputConsole("Node disappeared.. '" + srcNodeKey + "'");
+      }
+    }
+  }
+
+  // Helper function to update a observed note
+  function getRefreshedNode(srcNodeKey) {
+    if (doDebug) {
+      outputConsole("Refreshing node selector..");
+    }
+
+    let targetNode = document.querySelector(srcNodeKey);
+
+    if (targetNode !== null) {
+      if (doDebug) {
+        outputConsole("Found refreshed node.");
+      }
+      return targetNode;
+    }
+
+    if (doDebug) {
+      outputConsole("Node not found by new selector..");
+    }
+    return false;
+  }
+
+  function attachObservers(pageRule) {
+    let observerDirectives = 0;
+    let observersAttached = 0;
+
+    if (Object.hasOwn(pageRule, "observerContainers")) {
+      let observerDict = pageRule["observerContainers"];
+
+      ++observerDirectives;
+
+      for (let key of Object.keys(observerDict)) {
+        let valueArray = observerDict[key];
+        let srcNode = document.querySelector(key);
+        let targetNode = document.querySelector(valueArray[1]);
+
+        if (srcNode === null) {
+          outputConsole(
+            "[webViper] [ OBSERVER ] source node with selector '" +
+              key +
+              "' not present. Please review the selector in the browser inspector.",
+          );
+
+          continue;
+        }
+
+        if (targetNode === null) {
+          outputConsole(
+            "[webViper] [ OBSERVER ] target node with selector '" +
+              valueArray[1] +
+              "' not present. Please review the selector in the browser inspector.",
+          );
+
+          continue;
+        }
+
+        let observerDirective = {
+          attributes: false,
+          childList: false,
+          subtree: false,
+        };
+
+        let configDict = valueArray[0];
+
+        if (typeof configDict === "string") {
+          if (configDict.indexOf("a") !== -1) {
+            observerDirective["attributes"] = true;
+          }
+
+          if (configDict.indexOf("c") !== -1) {
+            observerDirective["childList"] = true;
+          }
+
+          if (configDict.indexOf("s") !== -1) {
+            observerDirective["subtree"] = true;
+          }
+        } else {
+          outputConsole(
+            "[webViper] [ OBSERVER ] Observer configDict wrong for " +
+              key +
+              ", use 'a' or 'c' and optional 's'.",
+          );
+
+          continue;
+        }
+
+        if (
+          !observerDirective["attributes"] &&
+          !observerDirective["childList"]
+        ) {
+          outputConsole(
+            "[webViper] [ OBSERVER ] Observer configDict wrong for " +
+              key +
+              ", either 'a' or 'c' must be present and optional 's' like 'as' or 'cs' or 'a' or 'c'.",
+          );
+
+          continue;
+        }
+
+        outputConsole(
+          "[webViper] [ OBSERVER ] Observer observerDirective for '" +
+            key +
+            "' is setup correct, using: '" +
+            valueArray[0] +
+            "'",
+        );
+
+        outputConsole(
+          "[webViper] [ OBSERVER ] Observed source: '" +
+            key +
+            "' and target: '" +
+            valueArray[1] +
+            "'",
+        );
+
+        let dynamicObserver = new window.MutationObserver(cleanUpViperedNodes);
+
+        // NOTE: Add custom funcs to the observer
+        // Store node for reconnection retrieval
+        dynamicObserver.getNodeKey = () => key;
+
+        // Refresh observer connection
+        dynamicObserver.reconnect = () => {
+          dynamicObserver.takeRecords();
+          dynamicObserver.disconnect();
+
+          let srcNodeKey = dynamicObserver.getNodeKey();
+          let node = getRefreshedNode(srcNodeKey);
+          if (doDebug) {
+            outputConsole("reconnecting observer..");
+          }
+
+          if (node !== false) {
+            dynamicObserver.observe(node, observerDirective);
+            if (doDebug) {
+              outputConsole("reconnected succesfully to node: ", node);
+            }
+          } else {
+            if (doDebug) {
+              outputConsole(
+                "connecting failed, node changed and not found, was: ",
+                srcNode,
+              );
+            }
+          }
+        };
+
+        dynamicObserver.observe(srcNode, observerDirective);
+
+        outputConsole(
+          "[webViper] [ OBSERVER ] Observer attached for: '" + key + "'",
+        );
+
+        observerList.push(dynamicObserver);
+        ++observersAttached;
+      }
+
+      return [observersAttached, observerDirectives];
+    }
+
+    return false;
+  }
+
   function initObserver() {
     for (const url of Object.keys(baseRuleSet)) {
       if (currentPageLocation.indexOf(url) > -1) {
@@ -385,7 +620,61 @@ function scriptWrapper() {
           "[webViper] [ RUN ] Rule found, starting observer for: " + url,
         );
 
-        observer.observe(document.body, observerConfig);
+        currentPageTarget = url;
+
+        // NOTE: Custom observer functions
+        pageObserver.reconnectAll = () => {
+          if (doDebug) {
+            outputConsole("reconnecting by observerList");
+          }
+          for (let observer of observerList) {
+            if (doDebug) {
+              outputConsole("reconnect by observerList");
+            }
+
+            observer.reconnect();
+            if (doDebug) {
+              outputConsole("observer reconnected.");
+            }
+          }
+
+          clearInterval(pageloadCheckTimer);
+          pageloadCheckTimer = null;
+          pageObserver.reconnect();
+        };
+
+        pageObserver.disconnectAll = () => {
+          pageObserver.takeRecords();
+          pageObserver.disconnect();
+          if (doDebug) {
+            outputConsole("observer freed and disconnected..");
+          }
+
+          if (doDebug) {
+            outputConsole("disconnecting by observerList");
+          }
+          for (let observer of observerList) {
+            observer.takeRecords();
+            observer.disconnect();
+            if (doDebug) {
+              outputConsole("observer freed and disconnected..");
+            }
+          }
+
+          pageObserver.observe(document.body, pageObserverConfig);
+        };
+
+        pageObserver.reconnect = () => {
+          if (doDebug) {
+            outputConsole("(Re)connecting pageObserver");
+          }
+
+          pageObserver.takeRecords();
+          pageObserver.disconnect();
+          pageObserver.observe(document.body, pageObserverConfig);
+        };
+
+        pageObserver.observe(document.body, pageObserverConfig);
         pageloadCheckTimer = setInterval(resetLoad, 2000);
         return;
       }
