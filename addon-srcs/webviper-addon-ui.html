@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>webViper - vipe the web</title>
     <link rel="icon" type="image/png" href="webviper-icon-96x96.png">
-    <link rel="stylesheet" href="webviper-addon-ui.css" type="text/css" />
+    <link rel="stylesheet" href="webviper-addon-ui.css" type="text/css">
 </head>
 
 <body>
@@ -22,7 +22,7 @@
                     <li><a href="#excludes">Excludes</a></li>
                     <li><a href="#elementContainers">Element Containers</a></li>
                     <li><a href="#replaceElements">Replace Elements</a></li>
-                    <br>
+                    <li></li>
                     <li><a href="#globalKeywords">Global Keywords</a></li>
                     <li><a href="#settings">Settings</a></li>
                 </ul>
@@ -37,60 +37,82 @@
                             </div>
 
                             <div class="expand-input" data-value="">
-                                <input type="text" id="searchRules" value="" name="searchRules" placeholder="Search existing rules or add new URL rule." title="Use the URL or URL parts like --> www.dwrox.net OR dwrox.net">
+                                <input type="text" id="searchRules" value="" name="searchRules"
+                                    placeholder="Search existing rules or add new URL rule."
+                                    title="Use the URL or URL parts like --> www.dwrox.net OR dwrox.net">
                             </div>
                             <ul id="ruleHits"></ul>
 
                             <div class="buttonActions">
-                                <button type="button" id="searchDeleteRule" title="Remove this rule" autocomplete="off" disabled="disabled">Remove</button>
+                                <button type="button" id="searchDeleteRule" title="Remove this rule" autocomplete="off"
+                                    disabled>
+                                    Remove
+                                </button>
                                 <div class="right-actions">
-                                    <button type="button" id="clearSearchRule" title="Clear rule selection and rule data" disabled="disabled">Clear</button>
+                                    <button type="button" id="clearSearchRule"
+                                        title="Clear rule selection and rule data" disabled>
+                                        Clear
+                                    </button>
                                 </div>
                             </div>
                             <label class="subTitle">Current action:</label>
                             <div>
-                                <input type="text" disabled="disabled" id="newURLRuleAction" autocomplete="off" name="newURLRuleAction" value="No action." title="The current action.">
+                                <input type="text" disabled id="newURLRuleAction" autocomplete="off"
+                                    name="newURLRuleAction" value="No action." title="The current action.">
                             </div>
                         </div>
                     </div>
 
                     <div class="actionItem" id="keywords-section">
                         <h2 class="title">Keywords</h2>
-                        <textarea id="keywords" name="keywords" autocomplete="off" placeholder="Keywords (one per line)" title="Keywords (one per line)"></textarea>
+                        <textarea id="keywords" name="keywords" autocomplete="off" placeholder="Keywords (one per line)"
+                            title="Keywords (one per line)"></textarea>
                     </div>
 
                     <div class="actionItem" id="excludes-section">
                         <h2 class="title">Excludes</h2>
-                        <textarea id="excludes" name="excludes" autocomplete="off" placeholder="Excludes (one per line)" title="Excludes (one per line)"></textarea>
+                        <textarea id="excludes" name="excludes" autocomplete="off" placeholder="Excludes (one per line)"
+                            title="Excludes (one per line)"></textarea>
                     </div>
 
                     <div class="actionItem" id="elementContainers-section">
                         <h2 class="title">Element Containers</h2>
                         <div class="multiContainer">
                             <div class="expand-input" data-value="">
-                                <input type="text" id="ruleSelector" name="ruleSelector" autocomplete="off" placeholder="Target HTML Tag / CSS selector" title="HTML Tag or CSS selector as target to analyze">
+                                <input type="text" id="ruleSelector" name="ruleSelector" autocomplete="off"
+                                    placeholder="Target HTML Tag / CSS selector"
+                                    title="HTML Tag or CSS selector as target to analyze">
                             </div>
                             <div>
-                                <textarea id="selectorParents" name="selectorParents" autocomplete="off" placeholder="Parents to remove (one per line)" title="CSS Selector for parent containers to remove"></textarea>
+                                <textarea id="selectorParents" name="selectorParents" autocomplete="off"
+                                    placeholder="Parents to remove (one per line)"
+                                    title="CSS Selector for parent containers to remove"></textarea>
                             </div>
                             <div class="buttonActions">
                                 <div class="left-actions">
-                                    <button type="button" id="addSelector" title="Add" disabled="disabled">Add</button>
-                                    <!--<button type="button" id="updateSelector" title="Update" disabled="disabled">Update</button>-->
+                                    <button type="button" id="addSelector" title="Add" disabled>
+                                        Add
+                                    </button>
+                                    <!--<button type="button" id="updateSelector" title="Update" disabled>Update</button>-->
                                 </div>
                                 <div class="right-actions">
-                                    <button type="button" id="clearSelector" title="Clear" disabled="disabled">Clear</button>
+                                    <button type="button" id="clearSelector" title="Clear" disabled>
+                                        Clear
+                                    </button>
                                 </div>
                             </div>
                             <div>
-                                <select id="elementContainers" name="elementContainers" title="Element Containers"></select>
+                                <select id="elementContainers" name="elementContainers"
+                                    title="Element Containers"></select>
                             </div>
 
                             <div class="buttonActions">
-                                <button type="button" id="removeSelectorRule" title="Remove selector rule" disabled="disabled">Remove</button>
+                                <button type="button" id="removeSelectorRule" title="Remove selector rule" disabled>
+                                    Remove
+                                </button>
                                 <!--
                                 <div class="right-actions">
-                                    <button type="button" id="clearSelectorRule" title="Clear selector rule selection" disabled="disabled">Clear</button>
+                                    <button type="button" id="clearSelectorRule" title="Clear selector rule selection" disabled>Clear</button>
                                 </div>
                                 -->
                             </div>
@@ -107,11 +129,16 @@
 
                     <div class="actionItem" id="globalKeywords-section">
                         <h2 class="title">Global Keywords</h2>
-                        <textarea id="globalKeywords" name="globalKeywords" autocomplete="off"  placeholder="Global keywords to search for (one per line)" title="Global keywords to search for (one per line)"></textarea>
+                        <textarea id="globalKeywords" name="globalKeywords" autocomplete="off"
+                            placeholder="Global keywords to search for (one per line)"
+                            title="Global keywords to search for (one per line)"></textarea>
                         <div class="multiContainer">
                             <div class="buttonActions">
                                 <div class="right-actions">
-                                    <button type="button" id="saveGlobalKeywords" name="saveGlobalKeywords" title="Save settings" disabled="disabled">Save</button>
+                                    <button type="button" id="saveGlobalKeywords" name="saveGlobalKeywords"
+                                        title="Save settings" disabled>
+                                        Save
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -121,14 +148,18 @@
                         <h2 class="title">Settings</h2>
                         <div class="multiContainer">
                             <h3 class="subTitle">Enable debugging</h3>
-                            <select id="debug" name="debug" title="Debug enabled which might help to troubleshoot issues">
+                            <select id="debug" name="debug"
+                                title="Debug enabled which might help to troubleshoot issues">
                                 <option value="true">Yes</option>
                                 <option value="false" selected>No</option>
                             </select>
 
                             <div class="buttonActions">
                                 <div class="right-actions">
-                                    <button type="button" id="saveSettings" name="saveSettings" title="Save settings" disabled="disabled">Save</button>
+                                    <button type="button" id="saveSettings" name="saveSettings" title="Save settings"
+                                        disabled>
+                                        Save
+                                    </button>
                                 </div>
                             </div>
                         </div>
