@@ -357,8 +357,10 @@ function initUI() {
                             let nextNavNode = navTarget.parentNode;
                             while (nextNavNode) {
                                 if (nextNavNode.nodeName === 'LI' && !hasClass(nextNavNode, 'disabled')) {
-                                    nextNavNode.children[0].click();
-                                    break;
+                                    if (nextNavNode.children[0].nodeName === 'A') {
+                                        nextNavNode.children[0].click();
+                                        break;
+                                    }
                                 }
 
                                 nextNavNode = nextNavNode.nextElementSibling;
@@ -367,8 +369,10 @@ function initUI() {
                             let nextNavNode = navTarget.parentNode;
                             while (nextNavNode) {
                                 if (nextNavNode.nodeName === 'LI' && !hasClass(nextNavNode, 'disabled')) {
-                                    nextNavNode.children[0].click();
-                                    break;
+                                    if (nextNavNode.children[0].nodeName === 'A') {
+                                        nextNavNode.children[0].click();
+                                        break;
+                                    }
                                 }
 
                                 nextNavNode = nextNavNode.previousElementSibling;
@@ -1155,7 +1159,7 @@ function hasFormDataChanged() {
 
             continue;
         } else if (item.id === 'ruleSelector') {
-            if (ruleSelector.value == '') {
+            if (controlRuleSelector.value == '') {
                 setDisableState(controlAddSelector, true);
                 // setDisableState(controlUpdateSelector, true);
                 setDisableState(controlClearSelector, true);
