@@ -1,13 +1,12 @@
 // ==UserScript==
 // @name         webViper
-// @version      2026-03-21
+// @version      2026-04-01
 // @description  vipe the web, like a pro, using the webViper
 // @author       Jan Riechers
 // @match        *://*/*
 // @grant        none
 // @run-at       document-idle
 // @website      https://webviper.dwrox.net
-// @downloadURL  https://github.com/jrie/webViper
 // @supportURL   https://github.com/jrie/webViper/issues
 // ==/UserScript==
 
@@ -23,31 +22,36 @@ function scriptWrapper() {
     // -----------------------------------------------------------------------------------
     const baseRuleSet = {
         /*
-    // Start a rule
-    "gog.com": {
-      keywords: ["in library", "in der bibliothek"],
-      excludes: [],
-      removeElement: true,
-      elementContainers: {
-        "span.product-label__text": [
-          ".swiper-slide:has(big-spot)",
-          "products-section-layout ~ a.product-tile",
-          "product-tile:has(store-picture)",
-        ],
-      },
-      // Very much experiemental, in short, clean viped elements:
-      // if element in observerContainers: "key" (css selector) change from [ "type", out of "(css) target"]
-      //
-      // What it does, call a clearing routine and also (re)attach mutation observers to the nodes.
-      observerContainers: {
-        // c => childList // THIS
-        // a => attributes // OR THIS
-        // s => subtree // Optional
-        ".paginated-products-grid.grid": ["c", "paginated-products-grid"],
-      },
-    },
-    // End of a rule
-     */
+        // Start a rule
+        'gog.com': {
+            keywords: ['in library', 'in der bibliothek'],
+            excludes: [],
+            removeElement: true,
+            showUnhide: true,       // Should elements be available for unhiding using mouseover?
+            animateUnhide: true,    // Should there be a animation when unhiding on mouseover?
+            elementContainers: {
+                'span.product-label__text': [
+                    '.swiper-slide:has(big-spot)',
+                    '.paginated-products-grid ~ a.product-tile',
+                    'products-section-layout ~ a.product-tile',
+                    'product-tile:has(store-picture)',
+                ],
+            },
+            // Very much experiemental, in short, clean viped elements:
+            // if element in observerContainers: "key" (css selector) change from [ "type", out of "(css) target"]
+            //
+            // What it does, call a clearing routine and also (re)attach mutation observers to the nodes.
+            observerContainers: {
+                // c => childList // THIS
+                // a => attributes // OR THIS
+                // s => subtree // Optional
+                '.paginated-products-grid': ['c', 'paginated-products-grid'],
+                //'.catalog__display-wrapper': ['c', 'paginated-products-grid'],
+            },
+        },
+        // End of a rule
+        */
+
         globalKeywords: [],
     };
     // -----------------------------------------------------------------------------------
@@ -60,48 +64,170 @@ function scriptWrapper() {
 
     const pageObserver = new window.MutationObserver(checkLoad);
     const pageObserverConfig = {
-        //subtree: true,
-        //childList: true,
+        subtree: true,
+        childList: false,
         attributes: true,
     };
 
     let observerList = [];
     let hasChange = true;
     let pageloadCheckTimer = null;
+    let avoidedInsertions = 0;
+
+    function show(replacement, toReplace) {
+        toReplace.style.height = '0px';
+        toReplace.style.minHeight = '0px';
+        toReplace.style.maxHeight = '0px';
+        toReplace.style.pointerEvents = 'none';
+
+        replacement.style.overflow = 'visible';
+        replacement.style.pointerEvents = 'all';
+        replacement.style.minHeight = '0';
+        replacement.style.height = replacement.customHeight;
+        replacement.style.maxHeight = replacement.customHeight;
+
+        toReplace.removeEventListener('mouseleave', function () {
+            show(replacement, toReplace);
+        });
+    }
+
+    function hide(replacement, toReplace) {
+        replacement.style.overflow = 'hidden';
+        replacement.style.height = '0px';
+        replacement.style.minHeight = '0px';
+        replacement.style.maxHeight = '0px';
+        replacement.style.pointerEvents = 'none';
+
+        toReplace.style.visibility = 'visible';
+        toReplace.style.overflow = 'visible';
+        toReplace.style.minHeight = '0';
+        toReplace.style.height = toReplace.customHeight;
+        toReplace.style.maxHeight = toReplace.customHeight;
+
+        let replaceHeight = parseFloat(toReplace.customHeight) * 0.3;
+
+        toReplace.parentNode.addEventListener('mouseleave', function () {
+            function hideCheck() {
+                if (toReplace.clientHeight <= replaceHeight) {
+                    toReplace.style.visibility = 'hidden';
+                    toReplace.style.overflow = 'hidden';
+                    clearInterval(callToHide);
+                }
+            }
+
+            let callToHide = setInterval(hideCheck, 10);
+            show(replacement, toReplace);
+        });
+
+        setTimeout(function () {
+            toReplace.style.pointerEvents = 'visible';
+        }, 350);
+    }
+
+    function getLastChildInQueue(src) {
+        if (src.children && src.children.length !== 0) {
+            return getLastChildInQueue(src.children[src.children.length - 1]);
+        }
+
+        return src;
+    }
 
     // -----------------------------------------------------------------------------------
-    function replaceElement(keyword, toReplace) {
+    function replaceElement(keyword, toReplace, showUnhide, animateUnhide) {
         if (toReplace.parentNode) {
-            const keyword = 'webViper';
-            const replacement = document.createElement(toReplace.nodeName.toLocaleLowerCase());
-            replacement.className = toReplace.className + ' vipered';
-            replacement.id = toReplace.id;
-            replacement.style = toReplace.style;
+            if (toReplace.querySelector(':has(.was-vipered)') !== null) {
+                // Avoid parsing of already viped elements or in case of nested elements.
+                ++avoidedInsertions;
+                return 3;
+            }
+
+            let lastChild = getLastChildInQueue(toReplace);
+            lastChild.classList.add('was-vipered');
+
+            const replaceText = 'This item was viped by';
+            const replaceKeyword = 'webViper';
+
+            toReplace = toReplace.children ? toReplace.children[toReplace.children.length - 1] : toReplace;
+            toReplace.parentNode.style.position = 'relative';
+
+            let customHeight = toReplace.offsetHeight + 'px';
+            let customWidth = toReplace.offsetWidth + 'px';
+
+            let replacement = document.createElement('span');
+            replacement.className = 'vipered';
+
             replacement.style.textAlign = 'left';
-            replacement.style.padding = '1.5vw 1.2vw';
-            replacement.style.width = toReplace.clientWidth ? toReplace.clientWidth + 'px' : 'auto';
-            replacement.style.height = toReplace.clientHeight ? toReplace.clientHeight + 'px' : 'auto';
-            replacement.style.position = 'relative';
-            replacement.style.display = 'inherit';
+            replacement.style.display = 'block';
+
+            if (toReplace.children.length === 1) {
+                replacement.style.position = 'absolute';
+                replacement.style.top = '0px';
+                replacement.style.left = '0px';
+            }
+
+            replacement.style.height = customHeight;
+            replacement.style.minHeight = customHeight;
+            replacement.style.maxHeight = '100%';
+            replacement.style.width = customWidth;
 
             const wrapperSpan = document.createElement('span');
-            wrapperSpan.style = 'color: #666; display: inline-block;';
-            wrapperSpan.appendChild(document.createTextNode('This item was viped by'));
+            wrapperSpan.style = 'color: #666; user-select: none; padding: 1.5vw 1.2vw; display: inline-block;';
+            wrapperSpan.appendChild(document.createTextNode(replaceText));
             wrapperSpan.appendChild(document.createElement('br'));
 
             const keywordSpan = document.createElement('span');
             keywordSpan.style = 'color: red; font-weight: bold; font-size: 1.65vw;';
-            keywordSpan.appendChild(document.createTextNode(keyword));
+            keywordSpan.appendChild(document.createTextNode(replaceKeyword));
             wrapperSpan.appendChild(keywordSpan);
-
             replacement.appendChild(wrapperSpan);
 
-            toReplace.parentNode.style.position = 'relative';
-            toReplace.parentNode.replaceChild(replacement, toReplace);
-            return true;
+            if (showUnhide) {
+                replacement.style.position = 'absolute';
+                replacement.style.top = '0px';
+                replacement.style.left = '0px';
+                replacement.style.maxWidth = customWidth;
+
+                replacement.style.overflow = 'visible';
+                replacement.style.visibility = 'visible';
+                replacement.style.pointerEvents = 'visible';
+                replacement.style.width = customWidth;
+                replacement.style.maxWidth = customWidth;
+
+                replacement.style.maxHeight = customHeight;
+                replacement.style.height = customHeight;
+                replacement.customWidth = customWidth;
+                replacement.customHeight = customHeight;
+
+                toReplace.style.overflow = 'hidden';
+                toReplace.style.visibility = 'hidden';
+                toReplace.style.pointerEvents = 'visible';
+                toReplace.style.minHeight = '0px';
+                toReplace.style.maxHeight = '0px';
+                toReplace.style.height = '0px';
+                toReplace.customWidth = customWidth;
+                toReplace.customHeight = customHeight;
+
+                if (animateUnhide) {
+                    toReplace.style.transition = 'height 320ms, min-height 320ms';
+                    toReplace.style.transitionTimingFunction = 'cubic-bezier';
+                }
+
+                function shortcutHide() {
+                    hide(replacement, toReplace);
+                }
+
+                toReplace.parentNode.style.minHeight = customHeight;
+                toReplace.parentNode.prepend(replacement);
+                replacement.addEventListener('mouseenter', shortcutHide);
+            } else {
+                toReplace.style.pointerEvents = 'none';
+                toReplace.parentNode.replaceChild(replacement, toReplace);
+            }
+
+            return 1;
         }
 
-        return false;
+        return 2;
     }
 
     // -----------------------------------------------------------------------------------
@@ -114,7 +240,15 @@ function scriptWrapper() {
     }
 
     // -----------------------------------------------------------------------------------
-    function doParse(removedByKeywords, targetContainers, targetExcludes, targetHasExcludes, targetRemove) {
+    function doParse(
+        removedByKeywords,
+        targetContainers,
+        targetExcludes,
+        targetHasExcludes,
+        targetRemove,
+        targetShowUnhide,
+        targetAnimateUnhide
+    ) {
         for (const containerKey of Object.keys(targetContainers)) {
             const targets = document.querySelectorAll(containerKey);
             if (targets.length === 0) {
@@ -144,7 +278,7 @@ function scriptWrapper() {
                     continue;
                 }
 
-                const data = parentContainer.innerHTML.toLocaleLowerCase();
+                const data = parentContainer.textContent.toLocaleLowerCase();
 
                 let hasExclude = false;
                 if (targetHasExcludes) {
@@ -165,18 +299,46 @@ function scriptWrapper() {
                     for (const keyword of Object.keys(removedByKeywords)) {
                         const keywordLower = keyword.toLocaleLowerCase();
                         if (data.indexOf(keywordLower) > -1) {
-                            if (replaceElement(keyword, parentContainer)) {
-                                ++removedByKeywords[keyword];
-                            }
+                            let result = replaceElement(
+                                keyword,
+                                parentContainer,
+                                targetShowUnhide,
+                                targetAnimateUnhide
+                            );
 
-                            break;
+                            if (result === 1) {
+                                ++removedByKeywords[keyword];
+                                break;
+                            } else {
+                                let target = parentContainer.querySelector('.was-vipered');
+                                if (target !== null) {
+                                    target.dispatchEvent(new MouseEvent('mouseenter'), { bubbles: true });
+                                }
+
+                                break;
+                            }
                         }
                     }
                 }
             }
 
+            if (avoidedInsertions !== 0) {
+                if (doDebug) {
+                    outputConsole(
+                        "[webViper] [ RUN ] [ POST PARSE ] Avoided insertions (reprocessing) for keyword '" +
+                            containerKey +
+                            "' ---> " +
+                            avoidedInsertions
+                    );
+
+                    avoidedInsertions = 0;
+                }
+            }
+
             if (excludeCount !== 0) {
-                outputConsole("[webViper] [ RUN ] [ PARSE ] Excluded for '" + containerKey + "' --->" + excludeCount);
+                outputConsole(
+                    "[webViper] [ RUN ] [ POST PARSE ] Excluded for '" + containerKey + "' ---> " + excludeCount
+                );
             }
         }
     }
@@ -203,6 +365,8 @@ function scriptWrapper() {
                 let targetExcludes = [];
                 let targetHasExcludes = false;
                 let targetRemove = false;
+                let targetShowUnhide = false;
+                let targetAnimateUnhide = false;
 
                 if (Object.hasOwn(baseRuleSet, 'globalKeywords')) {
                     targetGlobalKeywords = baseRuleSet.globalKeywords;
@@ -227,18 +391,36 @@ function scriptWrapper() {
                     targetRemove = true;
                 }
 
+                if (Object.hasOwn(baseRuleSet[targetUrl], 'showUnhide') && baseRuleSet[targetUrl].showUnhide) {
+                    targetShowUnhide = true;
+
+                    if (Object.hasOwn(baseRuleSet[targetUrl], 'animateUnhide') && baseRuleSet[targetUrl].showUnhide) {
+                        targetAnimateUnhide = true;
+                    }
+                }
+
                 if (doDebug) {
                     outputConsole('[webViper] [ DEBUG ] global keywords    : ', targetGlobalKeywords);
                     outputConsole('[webViper] [ DEBUG ] rule               : ', targetUrl);
                     outputConsole('[webViper] [ DEBUG ] keywords           : ', targetKeywords);
                     outputConsole('[webViper] [ DEBUG ] elementContainers  : ', targetContainers);
                     outputConsole('[webViper] [ DEBUG ] excludes           : ', targetExcludes);
+                    outputConsole('[webViper] [ DEBUG ] removeElement      : ', targetRemove);
+                    outputConsole('[webViper] [ DEBUG ] showUnhide         : ', targetShowUnhide);
                 }
 
                 createKeywordsRemovalDict(removedByKeywords, targetGlobalKeywords);
                 createKeywordsRemovalDict(removedByKeywords, targetKeywords);
 
-                doParse(removedByKeywords, targetContainers, targetExcludes, targetHasExcludes, targetRemove);
+                doParse(
+                    removedByKeywords,
+                    targetContainers,
+                    targetExcludes,
+                    targetHasExcludes,
+                    targetRemove,
+                    targetShowUnhide,
+                    targetAnimateUnhide
+                );
                 break;
             }
         }
@@ -247,7 +429,7 @@ function scriptWrapper() {
         for (const key of Object.keys(removedByKeywords)) {
             const amount = removedByKeywords[key];
             if (amount > 0) {
-                outputConsole('[webViper] Removed for keyword  : ' + key + ' ----> ' + amount);
+                outputConsole('[webViper] Removed for keyword  : "' + key + '" ----> ' + amount);
                 vipedByViper += amount;
             }
         }
@@ -261,21 +443,16 @@ function scriptWrapper() {
         }
     }
 
-    let obersersAttached = false;
+    let observersAttached = false;
+    let triedObserverAttach = false;
 
     function resetLoad() {
         if (!hasChange) {
             clearInterval(pageloadCheckTimer);
             pageloadCheckTimer = null;
 
-            if (obersersAttached) {
-                pageObserver.disconnectAll();
-            }
-
             // NOTE: Load attached observers after the page finished loading
-            if (!obersersAttached) {
-                obersersAttached = true;
-
+            if (!triedObserverAttach) {
                 let result = attachObservers(baseRuleSet[currentPageTarget]);
                 if (result && result !== false) {
                     outputConsole(
@@ -285,56 +462,58 @@ function scriptWrapper() {
                     if (doDebug) {
                         outputConsole('[webViper] [ OBSERVER ] List: ', observerList);
                     }
+
+                    observersAttached = true;
+                }
+
+                triedObserverAttach = true;
+            } else if (observersAttached) {
+                for (let observer of observerList) {
+                    observer.reconnect();
                 }
             }
 
-            doVipe();
             pageObserver.takeRecords();
-            pageObserver.reconnectAll();
-            return;
+            pageObserver.disconnect();
+
+            doVipe();
+            pageObserver.reconnect();
+            hasChange = true;
         }
 
         hasChange = false;
     }
 
-    function checkLoad() {
+    function checkLoad(mutations, srcObserver) {
         hasChange = true;
+
+        if (!pageloadCheckTimer) {
+            srcObserver.takeRecords();
+            srcObserver.reconnect();
+
+            pageloadCheckTimer = setInterval(resetLoad, 500);
+        }
     }
 
     function cleanUpViperedNodes(mutations, srcObserver) {
-        let srcNodeKey = srcObserver.getNodeKey();
-        let refreshedTarget = getRefreshedNode(srcNodeKey);
+        pageObserver.disconnect();
+
+        let refreshedTarget = getRefreshedNode(srcObserver.nodeKey);
+
         if (refreshedTarget) {
-            let nodeList = refreshedTarget.querySelectorAll('.vipered');
-            if (doDebug) {
-                outputConsole('nodeList', nodeList);
-            }
+            let nodeList = refreshedTarget.querySelectorAll(':has(.vipered)');
 
-            if (nodeList === null) {
-                return;
-            }
-
-            // Deactivate observer
-            pageObserver.disconnectAll();
-            //pageObserver.disconnect();
-
-            for (let node of nodeList) {
+            for (const node of nodeList) {
                 node.parentNode.removeChild(node);
             }
-
-            // Reactivate page observer
-            pageObserver.reconnectAll();
-            //pageObserver.reconnect();
-
-            hasChange = true;
-            clearInterval(pageloadCheckTimer);
-            pageloadCheckTimer = null;
-            pageloadCheckTimer = setInterval(resetLoad, 1000);
         } else {
             if (doDebug) {
-                outputConsole("Node disappeared.. '" + srcNodeKey + "'");
+                outputConsole("[!!] Node disappeared '" + srcObserver.nodeKey + "'");
             }
         }
+
+        doVipe();
+        pageObserver.reconnect();
     }
 
     // Helper function to update a observed note
@@ -355,6 +534,7 @@ function scriptWrapper() {
         if (doDebug) {
             outputConsole('Node not found by new selector..');
         }
+
         return false;
     }
 
@@ -365,9 +545,9 @@ function scriptWrapper() {
         if (Object.hasOwn(pageRule, 'observerContainers')) {
             let observerDict = pageRule['observerContainers'];
 
-            ++observerDirectives;
-
             for (let key of Object.keys(observerDict)) {
+                ++observerDirectives;
+
                 let valueArray = observerDict[key];
                 let srcNode = document.querySelector(key);
                 let targetNode = document.querySelector(valueArray[1]);
@@ -448,15 +628,14 @@ function scriptWrapper() {
 
                 // NOTE: Add custom funcs to the observer
                 // Store node for reconnection retrieval
-                dynamicObserver.getNodeKey = () => key;
+                dynamicObserver.nodeKey = key;
 
                 // Refresh observer connection
-                dynamicObserver.reconnect = () => {
+                dynamicObserver.reconnect = function () {
                     dynamicObserver.takeRecords();
                     dynamicObserver.disconnect();
 
-                    let srcNodeKey = dynamicObserver.getNodeKey();
-                    let node = getRefreshedNode(srcNodeKey);
+                    let node = getRefreshedNode(dynamicObserver.nodeKey);
                     if (doDebug) {
                         outputConsole('reconnecting observer..');
                     }
@@ -468,7 +647,10 @@ function scriptWrapper() {
                         }
                     } else {
                         if (doDebug) {
-                            outputConsole('connecting failed, node changed and not found, was: ', srcNode);
+                            outputConsole(
+                                'connecting failed, node changed and not found, was: ',
+                                dynamicObserver.nodeKey
+                            );
                         }
                     }
                 };
@@ -494,60 +676,19 @@ function scriptWrapper() {
 
                 currentPageTarget = url;
 
-                // NOTE: Custom observer functions
-                pageObserver.reconnectAll = () => {
-                    if (doDebug) {
-                        outputConsole('reconnecting by observerList');
-                    }
-                    for (let observer of observerList) {
-                        if (doDebug) {
-                            outputConsole('reconnect by observerList');
-                        }
-
-                        observer.reconnect();
-                        if (doDebug) {
-                            outputConsole('observer reconnected.');
-                        }
-                    }
-
-                    clearInterval(pageloadCheckTimer);
-                    pageloadCheckTimer = null;
-                    pageObserver.reconnect();
-                };
-
-                pageObserver.disconnectAll = () => {
+                pageObserver.reconnect = function () {
                     pageObserver.takeRecords();
                     pageObserver.disconnect();
-                    if (doDebug) {
-                        outputConsole('observer freed and disconnected..');
-                    }
-
-                    if (doDebug) {
-                        outputConsole('disconnecting by observerList');
-                    }
-                    for (let observer of observerList) {
-                        observer.takeRecords();
-                        observer.disconnect();
-                        if (doDebug) {
-                            outputConsole('observer freed and disconnected..');
-                        }
-                    }
-
-                    pageObserver.observe(document.body, pageObserverConfig);
-                };
-
-                pageObserver.reconnect = () => {
                     if (doDebug) {
                         outputConsole('(Re)connecting pageObserver');
                     }
 
-                    pageObserver.takeRecords();
-                    pageObserver.disconnect();
                     pageObserver.observe(document.body, pageObserverConfig);
                 };
 
                 pageObserver.observe(document.body, pageObserverConfig);
-                pageloadCheckTimer = setInterval(resetLoad, 2000);
+
+                pageloadCheckTimer = setInterval(resetLoad, 500);
                 return;
             }
         }
