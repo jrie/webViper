@@ -21,8 +21,8 @@
                     <li><a href="#keywords">Keywords</a></li>
                     <li><a href="#excludes">Excludes</a></li>
                     <li><a href="#elementContainers">Element Containers</a></li>
-                    <li><a href="#replaceElements">Replace Elements</a></li>
-                    <<li><br></li>>
+                    <li><a href="#variousOptions">Various Options</a></li>
+                    <li><br></li>
                     <li><a href="#globalKeywords">Global Keywords</a></li>
                     <li><a href="#settings">Settings</a></li>
                 </ul>
@@ -119,12 +119,25 @@
                         </div>
                     </div>
 
-                    <div class="actionItem" id="replaceElements-section">
-                        <h2 class="title">Replace Elements</h2>
-                        <select id="replaceElements" name="replaceElements" title="Remove elements on page">
+                    <div class="actionItem" id="variousOptions-section">
+                        <h2 class="title">Replace Elements on page?</h2>
+                        <select id="replaceElements" name="replaceElements" title="Remove elements on page?">
                             <option value="true" selected>Yes</option>
                             <option value="false">No</option>
                         </select>
+                        <div class="multiContainer">
+                            <h2 class="title">Allow unhide by mouse over?</h2>
+                            <select id="showUnhide" name="showUnhide" title="Allow unhide by mouse over?">
+                                <option value="true" selected>Yes</option>
+                                <option value="false">No</option>
+                            </select>
+    
+                            <h2 class="title">Animate on unhide?</h2>
+                            <select id="animateUnhide" name="animateUnhide" title="Animate on unhide?">
+                                <option value="true" selected>Yes</option>
+                                <option value="false">No</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div class="actionItem" id="globalKeywords-section">

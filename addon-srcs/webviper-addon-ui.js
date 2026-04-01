@@ -121,7 +121,7 @@ const navURL = document.querySelector('#navigation a[href="#url"]');
 const navKeywords = document.querySelector('#navigation a[href="#keywords"]');
 const navExcludes = document.querySelector('#navigation a[href="#excludes"]');
 const navElementContainers = document.querySelector('#navigation a[href="#elementContainers"]');
-const navReplaceElements = document.querySelector('#navigation a[href="#replaceElements"]');
+const navVariousOptions = document.querySelector('#navigation a[href="#variousOptions"]');
 const navGlobalKeywords = document.querySelector('#navigation a[href="#globalKeywords"]');
 const navSettings = document.querySelector('#navigation a[href="#settings"]');
 
@@ -158,6 +158,8 @@ const controlRemoveSelectorRule = document.getElementById('removeSelectorRule');
 // ReplaceElement fields
 // ---------------------------------------------------
 const controlReplaceElements = document.getElementById('replaceElements');
+const controlShowUnhide = document.getElementById('showUnhide');
+const controlAnimateUnhide = document.getElementById('animateUnhide');
 
 // ---------------------------------------------------
 // Global keywords fields
@@ -180,7 +182,10 @@ controlSaveAll.addEventListener('click', function (evt) {
     const targetURL = controlSearchRules.value.trim();
     const keywords = controlKeywords.value.trim().split('\n');
     const excludes = controlExcludes.value.trim().split('\n');
+    const selectors = controlSelectorParents.value.trim().split('\n');
     const removeElement = controlReplaceElements.value === 'true';
+    const showUnhide = controlShowUnhide.value === 'true';
+    const animateUnhide = controlAnimateUnhide.value === 'true';
 
     const resultKeywords = [];
     for (let item of keywords) {
@@ -211,9 +216,12 @@ controlSaveAll.addEventListener('click', function (evt) {
 
     controlExcludes.value = resultExcludes.join('\n');
 
+    // Create the rule
     newCreatedRuleDictionary[targetURL] = {};
     newCreatedRuleDictionary[targetURL].keywords = resultKeywords;
     newCreatedRuleDictionary[targetURL].excludes = resultExcludes;
+    newCreatedRuleDictionary[targetURL].showUnhide = resultExcludes;
+    newCreatedRuleDictionary[targetURL].animateUnhide = resultExcludes;
 
     const elementContainersRules = {};
     const elementContainersOptions = controlElementContainers.options;
@@ -240,6 +248,8 @@ controlSaveAll.addEventListener('click', function (evt) {
 
     newCreatedRuleDictionary[targetURL].elementContainers = elementContainersRules;
     newCreatedRuleDictionary[targetURL].removeElement = removeElement;
+    newCreatedRuleDictionary[targetURL].showUnhide = showUnhide;
+    newCreatedRuleDictionary[targetURL].animateUnhide = animateUnhide;
 
     if (!hasDisabled(controlSaveGlobalKeywords)) {
         window.alert("You have unsaved 'Global Keywords' changes.");
@@ -421,7 +431,7 @@ function initUI() {
     disableNavItem(navKeywords);
     disableNavItem(navExcludes);
     disableNavItem(navElementContainers);
-    disableNavItem(navReplaceElements);
+    disableNavItem(navVariousOptions);
 
     setDisableState(controlSaveAll, true);
 
@@ -715,6 +725,14 @@ function initUI() {
         hasFormDataChanged();
     });
 
+    controlShowUnhide.addEventListener('change', function (evt) {
+        hasFormDataChanged();
+    });
+
+    controlAnimateUnhide.addEventListener('change', function (evt) {
+        hasFormDataChanged();
+    });
+
     // ---------------------------------------------------------------------------------------
     controlGlobalKeywords.addEventListener('keyup', function (evt) {
         setDisableState(
@@ -877,7 +895,7 @@ function searchRules(evt) {
         disableNavItem(navKeywords);
         disableNavItem(navExcludes);
         disableNavItem(navElementContainers);
-        disableNavItem(navReplaceElements);
+        disableNavItem(navVariousOptions);
         return;
     }
 
@@ -940,7 +958,7 @@ function searchRules(evt) {
         enabledNavItem(navKeywords);
         enabledNavItem(navExcludes);
         enabledNavItem(navElementContainers);
-        enabledNavItem(navReplaceElements);
+        enabledNavItem(navVariousOptions);
         return;
     } else if (hits === 0 && !hasExactHit) {
         setDisableState(controlSearchDeleteRule, true);
@@ -962,7 +980,7 @@ function searchRules(evt) {
                 disableNavItem(navKeywords);
                 disableNavItem(navExcludes);
                 disableNavItem(navElementContainers);
-                disableNavItem(navReplaceElements);
+                disableNavItem(navVariousOptions);
             }
 
             setExpanderValue(evt.target, ruleHits[0]);
@@ -990,7 +1008,7 @@ function fillRuleBySearchSelection(evt) {
     enabledNavItem(navKeywords);
     enabledNavItem(navExcludes);
     enabledNavItem(navElementContainers);
-    enabledNavItem(navReplaceElements);
+    enabledNavItem(navVariousOptions);
 
     clearExpanderValue(controlSearchRules);
 
@@ -1011,7 +1029,7 @@ function setRuleFromSearch(evt) {
     enabledNavItem(navKeywords);
     enabledNavItem(navExcludes);
     enabledNavItem(navElementContainers);
-    enabledNavItem(navReplaceElements);
+    enabledNavItem(navVariousOptions);
 
     clearExpanderValue(controlSearchRules);
 
@@ -1055,7 +1073,7 @@ function clearSearchRule() {
     disableNavItem(navKeywords);
     disableNavItem(navExcludes);
     disableNavItem(navElementContainers);
-    disableNavItem(navReplaceElements);
+    disableNavItem(navVariousOptions);
 
     clearExpanderValue(controlSearchRules);
     clearRuleValues();
@@ -1278,10 +1296,14 @@ function clearRuleValues() {
     setDataValue(controlExcludes, originalValueStore, controlExcludes.value);
 
     controlReplaceElements.value = 'true';
+    controlShowUnhide.value = 'false';
+    controlAnimateUnhide.value = 'false';
 
     controlRuleSelector.value = '';
     controlSelectorParents.value = '';
     setDataValue(controlReplaceElements, originalValueStore, controlReplaceElements.value);
+    setDataValue(controlShowUnhide, originalValueStore, controlShowUnhide.value);
+    setDataValue(controlAnimateUnhide, originalValueStore, controlAnimateUnhide.value);
 
     controlElementContainers.replaceChildren();
     controlElementContainers.appendChild(createSelectOption('', 'Select selector rule for edit', true, true));
@@ -1342,10 +1364,24 @@ function setRuleValues(ruleKey) {
     setDataValue(controlElementContainers, originalValueStore, controlElementContainers.length);
 
     // ---------------------------------------------------------------------------------------
+    // Various options section
+
     if (Object.hasOwn(rule, 'removeElement') && rule.removeElement === true) {
         controlReplaceElements.value = 'true';
     } else {
         controlReplaceElements.value = 'false';
+    }
+
+    if (Object.hasOwn(rule, 'showUnhide') && rule.showUnhide === true) {
+        controlShowUnhide.value = 'true';
+    } else {
+        controlShowUnhide.value = 'false';
+    }
+
+    if (Object.hasOwn(rule, 'animateUnhide') && rule.animateUnhide === true) {
+        controlAnimateUnhide.value = 'true';
+    } else {
+        controlAnimateUnhide.value = 'false';
     }
 
     setDataValue(controlReplaceElements, originalValueStore, controlReplaceElements.value);
