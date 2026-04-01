@@ -393,10 +393,10 @@ function scriptWrapper() {
 
                 if (Object.hasOwn(baseRuleSet[targetUrl], 'showUnhide') && baseRuleSet[targetUrl].showUnhide) {
                     targetShowUnhide = true;
+                }
 
-                    if (Object.hasOwn(baseRuleSet[targetUrl], 'animateUnhide') && baseRuleSet[targetUrl].showUnhide) {
-                        targetAnimateUnhide = true;
-                    }
+                if (Object.hasOwn(baseRuleSet[targetUrl], 'animateUnhide') && baseRuleSet[targetUrl].showUnhide) {
+                    targetAnimateUnhide = true;
                 }
 
                 if (doDebug) {
@@ -407,6 +407,7 @@ function scriptWrapper() {
                     outputConsole('[webViper] [ DEBUG ] excludes           : ', targetExcludes);
                     outputConsole('[webViper] [ DEBUG ] removeElement      : ', targetRemove);
                     outputConsole('[webViper] [ DEBUG ] showUnhide         : ', targetShowUnhide);
+                    outputConsole('[webViper] [ DEBUG ] animateUnhide      : ', targetAnimateUnhide);
                 }
 
                 createKeywordsRemovalDict(removedByKeywords, targetGlobalKeywords);
