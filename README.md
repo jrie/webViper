@@ -24,17 +24,30 @@ The definition for a website is in `const baseRuleSet = { ... }`, here an exampl
 // -----------------------------------------------------------------------------------
 let baseRuleSet = {
   // Start adding changes in here
-  "gog.com": {
-    keywords: ["in library", "in der bibliothek"],
-    excludes: [],
-    removeElement: true,
-    elementContainers: {
-      "span.product-label__text": [
-        ".swiper-slide:has(big-spot)",
-        "products-section-layout ~ a.product-tile",
-        "product-tile:has(store-picture)",
-      ],
-    },
+  'gog.com': {
+      keywords: ['in library', 'in der bibliothek'],
+      excludes: [],
+      removeElement: true,
+      showUnhide: true,       // Should elements be available for unhiding using mouseover?
+      animateUnhide: true,    // Should there be a animation when unhiding on mouseover?
+      elementContainers: {
+          ' ': [
+              '.swiper-slide:has(big-spot)',
+              '.paginated-products-grid ~ a.product-tile',
+              'products-section-layout ~ a.product-tile',
+              'product-tile:has(store-picture)',
+          ],
+      },
+      // Very much experiemental, not in UI yet, in short, clean viped elements:
+      // if element in observerContainers: "key" (css selector) change from [ "type", out of "(css) target"]
+      //
+      // What it does, call a clearing routine and also (re)attach mutation observers to the nodes.
+      observerContainers: {
+          // c => childList // THIS
+          // a => attributes // OR THIS
+          // s => subtree // Optional
+          '.paginated-products-grid': ['c', 'paginated-products-grid'],
+      },
   },
   globalKeywords: [],
 };
