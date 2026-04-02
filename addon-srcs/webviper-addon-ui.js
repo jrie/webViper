@@ -220,8 +220,9 @@ controlSaveAll.addEventListener('click', function (evt) {
     newCreatedRuleDictionary[targetURL] = {};
     newCreatedRuleDictionary[targetURL].keywords = resultKeywords;
     newCreatedRuleDictionary[targetURL].excludes = resultExcludes;
-    newCreatedRuleDictionary[targetURL].showUnhide = resultExcludes;
-    newCreatedRuleDictionary[targetURL].animateUnhide = resultExcludes;
+    newCreatedRuleDictionary[targetURL].showUnhide = showUnhide;
+    newCreatedRuleDictionary[targetURL].animateUnhide = animateUnhide;
+    newCreatedRuleDictionary[targetURL].removeElement = removeElement;
 
     const elementContainersRules = {};
     const elementContainersOptions = controlElementContainers.options;
@@ -247,9 +248,6 @@ controlSaveAll.addEventListener('click', function (evt) {
     }
 
     newCreatedRuleDictionary[targetURL].elementContainers = elementContainersRules;
-    newCreatedRuleDictionary[targetURL].removeElement = removeElement;
-    newCreatedRuleDictionary[targetURL].showUnhide = showUnhide;
-    newCreatedRuleDictionary[targetURL].animateUnhide = animateUnhide;
 
     if (!hasDisabled(controlSaveGlobalKeywords)) {
         window.alert("You have unsaved 'Global Keywords' changes.");
