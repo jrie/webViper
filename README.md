@@ -3,7 +3,7 @@
 ![teaser-stores-640x400](https://github.com/user-attachments/assets/0087ef71-9ce6-43bf-b38f-f65b427f8c99)
 
 ## webViper in short
-webViper a versatile, and easy to use web cleaner based on rule sets. There are example rules for German news websites.
+webViper a versatile, and easy to use web cleaner based on rule sets. There are example rules for Gog.com.
 Filter rules and keywords can be set for each website individually. Global keywords can be used for all website defined rules.
 
 ## Usage options
