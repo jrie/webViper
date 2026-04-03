@@ -66,19 +66,21 @@ async function loadSettings() {
 
     // ---------------------------------------------------------------------------------
     // Merge base ruleset with user definitions
-    ruleSet = baseRuleSet;
+    ruleSet = Object.assign({}, baseRuleSet);
+
     if (ruleSetStoreValue && Object.hasOwn(ruleSetStoreValue, pathRuleSet)) {
         const rule = ruleSetStoreValue[pathRuleSet];
-        for (const url of Object.keys(rule)) {
+        for (const url of Object.keys(rule).sort()) {
             const merged = Object.assign({}, baseRuleSet[url], rule[url]);
             ruleSet[url] = merged;
         }
     }
 
     // ---------------------------------------------------------------------------------
-    controlUrlRuleList.appendChild(createSelectOption('', 'No selection', true, false));
+
+    controlUrlRuleList.appendChild(createSelectOption('', 'No selection', true, false, true));
     for (const key of Object.keys(ruleSet)) {
-        controlUrlRuleList.appendChild(createSelectOption(key, key, false, false));
+        controlUrlRuleList.appendChild(createSelectOption(key, key, false, false, false));
     }
 
     // ---------------------------------------------------------------------------------
@@ -157,6 +159,7 @@ const navExcludes = document.querySelector('#navigation a[href="#excludes"]');
 const navElementContainers = document.querySelector('#navigation a[href="#elementContainers"]');
 const navVariousOptions = document.querySelector('#navigation a[href="#variousOptions"]');
 const navGlobalKeywords = document.querySelector('#navigation a[href="#globalKeywords"]');
+const navImportRuleSets = document.querySelector('#navigation a[href="#importRuleSets"]');
 const navSettings = document.querySelector('#navigation a[href="#settings"]');
 
 // -----------------------------------------------------------------------------------------
@@ -202,6 +205,12 @@ const controlGlobalKeywords = document.getElementById('globalKeywords');
 const controlSaveGlobalKeywords = document.getElementById('saveGlobalKeywords');
 
 // ---------------------------------------------------
+// Import rules fields
+// ---------------------------------------------------
+const controlImportRuleSets = document.getElementById('importRuleSets');
+const controlSaveImportRuleSets = document.getElementById('saveImportRuleSets');
+
+// ---------------------------------------------------
 // Settings fields
 // ---------------------------------------------------
 const controlDebug = document.getElementById('debug');
@@ -216,7 +225,6 @@ controlSaveAll.addEventListener('click', function (evt) {
     const targetURL = controlSearchRules.value.trim();
     const keywords = controlKeywords.value.trim().split('\n');
     const excludes = controlExcludes.value.trim().split('\n');
-    const selectors = controlSelectorParents.value.trim().split('\n');
     const removeElement = controlReplaceElements.value === 'true';
     const showUnhide = controlShowUnhide.value === 'true';
     const animateUnhide = controlAnimateUnhide.value === 'true';
@@ -286,6 +294,12 @@ controlSaveAll.addEventListener('click', function (evt) {
     if (!hasDisabled(controlSaveGlobalKeywords)) {
         window.alert("You have unsaved 'Global Keywords' changes.");
         setActiveLinkAndScroll('globalKeywords-section');
+        return;
+    }
+
+    if (!hasDisabled(controlSaveImportRuleSets)) {
+        window.alert("You have unsaved 'Import rules' changes.");
+        setActiveLinkAndScroll('importRuleSets-section');
         return;
     }
 
@@ -615,7 +629,7 @@ function initUI() {
 
             if (!hasOption) {
                 const selectorValues = controlSelectorParents.value.trim().split('\n').join(cssArrayDelimeter);
-                const selectorOption = createSelectOption(selectorValues, selectorKey, false, false);
+                const selectorOption = createSelectOption(selectorValues, selectorKey, false, false, false);
                 selectorOption.text += ' (added on save)';
 
                 setDataValue(selectorOption, 'added', true);
@@ -795,6 +809,53 @@ function initUI() {
     });
 
     // ---------------------------------------------------------------------------------------
+    controlImportRuleSets.addEventListener('keyup', function (evt) {
+        setDisableState(
+            controlSaveImportRuleSets,
+            isEqual(evt.target.value, getDatasetValue(evt.target, originalValueStore))
+        );
+    });
+
+    controlSaveImportRuleSets.addEventListener('click', function (evt) {
+        // Merge base ruleset with user definitions
+
+        let importRuleData = {};
+        let inputData = controlImportRuleSets.value.replace(/[\t]+/gm, '');
+        try {
+            importRuleData = JSON.parse(inputData);
+        } catch (err) {
+            window.alert(
+                'The ruleset (JSON data) contains errors, could not import rule data, see next message for details.'
+            );
+
+            window.alert('JSON error details:\n' + err.message);
+            return;
+        }
+
+        ruleSet = Object.assign({}, baseRuleSet);
+
+        let ruleKeys = Object.keys(importRuleData);
+        for (const url of ruleKeys) {
+            // TODO: Do not overwrite, merge? - Offer option in UI..
+            //const merged = Object.assign({}, baseRuleSet[url], importRuleData[url]);
+            if (Object.hasOwn(baseRuleSet, url)) {
+                ruleSet[url] = Object.assign(baseRuleSet[url], importRuleData[url]);
+            } else {
+                ruleSet[url] = importRuleData[url];
+            }
+        }
+
+        setDisableState(evt.target, true);
+        if (saveSetting(pathRuleSet, ruleSet)) {
+            window.alert('Succesfully imported rules for:\n\n' + ruleKeys.join('\n'));
+            setDisableState(controlSaveImportRuleSets, true);
+
+            // Force UI clearing...
+            clearUIAfterImport();
+        }
+    });
+
+    // ---------------------------------------------------------------------------------------
     controlDebug.addEventListener('change', function (evt) {
         setDisableState(
             controlSaveSettings,
@@ -823,6 +884,40 @@ function initUI() {
 }
 
 // ---------------------------------------------------------------------------------------
+// Misc helpers
+// ---------------------------------------------------------------------------------------
+function clearUIAfterImport() {
+    let UItextElements = document.querySelectorAll('input, textarea');
+
+    for (let item of UItextElements) {
+        item.value = '';
+    }
+
+    for (const child of controlUrlRuleList.children) {
+        controlUrlRuleList.removeChild(child);
+    }
+
+    for (const option of controlUrlRuleList.options) {
+        controlUrlRuleList.removeChild(option);
+    }
+
+    controlUrlRuleList.appendChild(createSelectOption('', 'No selection', true, false, true));
+    for (const key of Object.keys(ruleSet)) {
+        controlUrlRuleList.appendChild(createSelectOption(key, key, false, false, false));
+    }
+
+    let UIselectElements = document.querySelectorAll('select');
+    for (let item of UIselectElements) {
+        for (const option of item.options) {
+            if (option.hasAttribute('default')) {
+                item.selectedIndex = option.index;
+                break;
+            }
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------------------
 // Main UI functionality
 // ---------------------------------------------------------------------------------------
 // Navigation helper
@@ -845,8 +940,13 @@ function isNavItemDisabled(target) {
 
 // ---------------------------------------------------------------------------------------
 function hasDisabled(target) {
-    return target.hasAttribute('disabled');
+    if (target) {
+        return target.hasAttribute('disabled');
+    }
+
+    return false;
 }
+
 // ---------------------------------------------------------------------------------------
 function isEqual(valueOne, valueTwo) {
     return valueOne === valueTwo;
@@ -897,7 +997,7 @@ function clearExpanderValue(target) {
 }
 
 // ---------------------------------------------------------------------------------------
-function createSelectOption(value, text, isSelected, isDisabled) {
+function createSelectOption(value, text, isSelected, isDisabled, isDefault) {
     const option = document.createElement('option');
 
     option.value = value;
@@ -909,6 +1009,10 @@ function createSelectOption(value, text, isSelected, isDisabled) {
 
     if (isDisabled) {
         setDisableState(option, true);
+    }
+
+    if (isDefault) {
+        option.setAttribute('default', '');
     }
 
     return option;
@@ -1128,16 +1232,7 @@ function setAddButtonToRestore(setRestore) {
 function hasFormDataChanged() {
     const dataHolders = document.querySelectorAll('.actionItem input, .actionItem textarea, .actionItem select');
 
-    const excludes = [
-        'newURLRuleAction',
-        'globalKeywords',
-        // TODO: Check those values
-        //'keywords',
-        //'excludes',
-        'debug',
-        'searchRules',
-        'selectorParents',
-    ];
+    const excludes = ['newURLRuleAction', 'globalKeywords', 'debug', 'searchRules', 'selectorParents'];
 
     const keyStoreFields = [controlRuleSelector.id];
 
@@ -1341,7 +1436,7 @@ function clearRuleValues() {
     setDataValue(controlAnimateUnhide, originalValueStore, controlAnimateUnhide.value);
 
     controlElementContainers.replaceChildren();
-    controlElementContainers.appendChild(createSelectOption('', 'Select selector rule for edit', true, true));
+    controlElementContainers.appendChild(createSelectOption('', 'Select selector rule for edit', true, true, false));
     setDataValue(controlElementContainers, originalValueStore, controlElementContainers.length);
 
     setDisableState(controlSaveAll, true);
