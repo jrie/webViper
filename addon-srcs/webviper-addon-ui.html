@@ -23,6 +23,7 @@
                         <li><a href="#variousOptions">Various Options</a></li>
                         <li><br /></li>
                         <li><a href="#globalKeywords">Global Keywords</a></li>
+                        <li><a href="#importRuleSets">Import Rulesets</a></li>
                         <li><a href="#settings">Settings</a></li>
                     </ul>
 
@@ -163,19 +164,19 @@
                         <div class="actionItem" id="variousOptions-section">
                             <h2 class="title">Replace Elements on page?</h2>
                             <select id="replaceElements" name="replaceElements" title="Remove elements on page?">
-                                <option value="true" selected>Yes</option>
+                                <option value="true" default selected>Yes</option>
                                 <option value="false">No</option>
                             </select>
                             <div class="multiContainer">
                                 <h2 class="title">Allow unhide by mouse over?</h2>
                                 <select id="showUnhide" name="showUnhide" title="Allow unhide by mouse over?">
-                                    <option value="true" selected>Yes</option>
+                                    <option value="true" default selected>Yes</option>
                                     <option value="false">No</option>
                                 </select>
 
                                 <h2 class="title">Animate on unhide?</h2>
                                 <select id="animateUnhide" name="animateUnhide" title="Animate on unhide?">
-                                    <option value="true" selected>Yes</option>
+                                    <option value="true" default selected>Yes</option>
                                     <option value="false">No</option>
                                 </select>
                             </div>
@@ -207,6 +208,32 @@
                             </div>
                         </div>
 
+                        <div class="actionItem" id="importRuleSets-section">
+                            <h2 class="title">Import rules into webViper</h2>
+                            <textarea
+                                id="importRuleSets"
+                                name="importRuleSets"
+                                autocomplete="off"
+                                placeholder="Import JSON rulesets"
+                                title="Import JSON rulesets"
+                            ></textarea>
+                            <div class="multiContainer">
+                                <div class="buttonActions">
+                                    <div class="right-actions">
+                                        <button
+                                            type="button"
+                                            id="saveImportRuleSets"
+                                            name="saveImportRuleSets"
+                                            title="Import rules"
+                                            disabled
+                                        >
+                                            Import rules
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="actionItem" id="settings-section">
                             <h2 class="title">Settings</h2>
                             <div class="multiContainer">
@@ -217,7 +244,7 @@
                                     title="Debug enabled which might help to troubleshoot issues"
                                 >
                                     <option value="true">Yes</option>
-                                    <option value="false" selected>No</option>
+                                    <option value="false" default selected>No</option>
                                 </select>
 
                                 <div class="buttonActions">
