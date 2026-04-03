@@ -131,7 +131,7 @@ async function saveSetting(settingName, value) {
         }
     }
 
-    let valuesArray = unpackDepth(value, [], '');
+    let valuesArray = unpackDepth(value, []);
 
     if (valuesArray.length !== 0) {
         value = valuesArray.join('\n');
