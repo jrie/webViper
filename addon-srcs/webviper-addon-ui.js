@@ -607,8 +607,6 @@ function initUI() {
                 const isOriginal = isEqual(originalValue, compareValue);
 
                 if (!isOriginal) {
-                    alert('in1');
-
                     if (getDatasetValue(option, 'added') === 'true') {
                         option.text = modifiedKey + ' (added on save)';
                         setDataValue(option, originalValueStore, compareValue);
