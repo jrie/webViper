@@ -103,12 +103,44 @@ async function saveSetting(settingName, value) {
         }
     }
 
+    function unpackDepth(srcValue, currentValues) {
+        if (Array.isArray(srcValue)) {
+            if (srcValue.length === 0) {
+                currentValues.push('no values set/empty');
+            } else {
+                for (let item in srcValue) {
+                    currentValues.push(item + ' => "' + srcValue[item] + '"');
+                }
+            }
+        } else if (typeof srcValue === 'object') {
+            let keys = Object.keys(srcValue);
+            if (keys.length === 0) {
+                currentValues.push('no values set/empty');
+            } else {
+                for (let key of keys) {
+                    currentValues.push('"' + key + '":');
+                    currentValues = unpackDepth(srcValue[key], currentValues);
+                }
+            }
+        } else {
+            currentValues.push(srcValue);
+        }
+
+        return currentValues;
+    }
+
+    let valuesArray = unpackDepth(value, [], '');
+
+    if (valuesArray.length !== 0) {
+        value = valuesArray.join('\n');
+    }
+
     if (!hasError) {
-        console.debug(`[webViper] [ SAVE ] [ SUCCESS ] Saved setting  '${settingName}' with value ==> ${value}`);
+        console.debug(`[webViper] [ SAVE ] [ SUCCESS ] Saved setting  '${settingName}' with value(s) ==>\n${value}`);
         return true;
     }
 
-    console.debug(`[webViper] [ SAVE ] [ ERROR ] Could not save setting  '${settingName}' with value ==> ${value}`);
+    console.debug(`[webViper] [ SAVE ] [ ERROR ] Could not save setting  '${settingName}' with value(s) ==>\n${value}`);
     return false;
 }
 
@@ -743,6 +775,11 @@ function initUI() {
         const resultKeywords = [];
         for (let item of keywords) {
             item = item.trim();
+
+            if (item.length === 0) {
+                continue;
+            }
+
             if (resultKeywords.indexOf(item) === -1) {
                 resultKeywords.push(item);
             }
