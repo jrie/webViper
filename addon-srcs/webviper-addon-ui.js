@@ -92,6 +92,34 @@ async function loadSettings() {
 // -----------------------------------------------------------------------------------------
 // Save settings routines
 // -----------------------------------------------------------------------------------------
+// Helper for recursive unpacking of store values for output
+function unpackDepth(srcValue, currentValues) {
+    if (Array.isArray(srcValue)) {
+        if (srcValue.length === 0) {
+            currentValues.push('no values set/empty');
+        } else {
+            for (let item in srcValue) {
+                currentValues.push(item + ' => "' + srcValue[item] + '"');
+            }
+        }
+    } else if (typeof srcValue === 'object') {
+        let keys = Object.keys(srcValue);
+        if (keys.length === 0) {
+            currentValues.push('no values set/empty');
+        } else {
+            for (let key of keys) {
+                currentValues.push('"' + key + '":');
+                currentValues = unpackDepth(srcValue[key], currentValues);
+            }
+        }
+    } else {
+        currentValues.push(srcValue);
+    }
+
+    return currentValues;
+}
+
+// Actual saving and response
 async function saveSetting(settingName, value) {
     let hasError = true;
 
@@ -101,32 +129,6 @@ async function saveSetting(settingName, value) {
         } else {
             hasError = await chrome.storage.local.set({ [settingName]: value });
         }
-    }
-
-    function unpackDepth(srcValue, currentValues) {
-        if (Array.isArray(srcValue)) {
-            if (srcValue.length === 0) {
-                currentValues.push('no values set/empty');
-            } else {
-                for (let item in srcValue) {
-                    currentValues.push(item + ' => "' + srcValue[item] + '"');
-                }
-            }
-        } else if (typeof srcValue === 'object') {
-            let keys = Object.keys(srcValue);
-            if (keys.length === 0) {
-                currentValues.push('no values set/empty');
-            } else {
-                for (let key of keys) {
-                    currentValues.push('"' + key + '":');
-                    currentValues = unpackDepth(srcValue[key], currentValues);
-                }
-            }
-        } else {
-            currentValues.push(srcValue);
-        }
-
-        return currentValues;
     }
 
     let valuesArray = unpackDepth(value, [], '');
