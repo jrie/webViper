@@ -18,7 +18,7 @@ function scriptWrapper() {
             showUnhide: true,       // Should elements be available for unhiding using mouseover?
             animateUnhide: true,    // Should there be a animation when unhiding on mouseover?
             elementContainers: {
-                ' ': [
+                'span.product-label__text': [
                     '.swiper-slide:has(big-spot)',
                     '.paginated-products-grid ~ a.product-tile',
                     'products-section-layout ~ a.product-tile',
