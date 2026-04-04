@@ -3,11 +3,10 @@
 ![teaser-stores-640x400](https://github.com/user-attachments/assets/0087ef71-9ce6-43bf-b38f-f65b427f8c99)
 
 ## webViper in short
-webViper a versatile, and easy to use web cleaner based on rule sets. There are example rules for Gog.com.
+webViper a versatile, and easy to use web cleaner (not content blocker!) based on rule sets. There is a example rule for **Gog.com** below.
 Filter rules and keywords can be set for each website individually. Global keywords can be used for all website defined rules.
 
-*Note:* In the "addon" version, there is a easy **Import Rulesets** function.. for testing. ;)
-
+*Note:* In the "addon" version, there is a easy ***Import Rulesets*** function in the UI.. for testing. ;)
 
 ## Usage options
 - as experimental *addon* (currently disabled, because broken and outdated!) for [Firefox](https://addons.mozilla.org/en-US/firefox/addon/webviper/)
@@ -15,8 +14,7 @@ Filter rules and keywords can be set for each website individually. Global keywo
 
 ## Filter rules, how to get clearing out working
 
-The definition for a website is in `const baseRuleSet = { ... }`, here an example:
-
+The definition for websites is in `const baseRuleSet = { ... }`, below a example.
 **Note:** This is not valid JSON for import of a rule, for a JSON example, refer to: `webViper-rule-template.json`
 
 
@@ -25,8 +23,8 @@ The definition for a website is in `const baseRuleSet = { ... }`, here an exampl
 // webpage example rule with notes - use "webViper-rule-template.json" instead for copy and paste!
 // --------------------------------------------------------------------------------------
 'gog.com': {
-  keywords: ['in library', 'in der bibliothek'],
-  excludes: [],
+  keywords: ['in library', 'in der bibliothek'],   // Keywords for the website (case insensitive)
+  excludes: [],                                    // Keywords to exclude if present (superseeds "keywords")
   removeElement: true,    // Should we do something if found?
   showUnhide: true,       // Should elements be available for unhiding using mouseover?
   animateUnhide: true,    // Should there be a animation when unhiding on mouseover?
@@ -38,24 +36,27 @@ The definition for a website is in `const baseRuleSet = { ... }`, here an exampl
           'product-tile:has(store-picture)',
       ],
   },
-  // MutationObserver Directive
+  // MutationObserver directive
   // Very much experiemental, not in UI yet, in short, clean viped elements during data change on the website.
   //
   // If element in observerContainers:
   // "key" (css selector parent) change from [ "mutation observer type", remove viped elements in "(css) target"]
   //
   // What it does, call a clearing routine and also (re)attach mutation observers to the nodes accordingly.
-  // This is purely optional.
+  // Multiple obsevers can be used/attached.
+  //
+  // Note: This is purely optional.
   //
   observerContainers: {
       // c => childList // THIS
       // a => attributes // AND/OR THIS
       // s => subtree // Optional
-      '.paginated-products-grid': ['c', 'paginated-products-grid']
+      '.paginated-products-grid': ['c', 'paginated-products-grid'],
+      // '.anoterObserverSelector': ['as', 'targetToClean'],   // for reference
   },
 };
 // -----------------------------------------------------------------------------------
-// webpage rules end - stop editing here
+// webpage rules end
 // -----------------------------------------------------------------------------------
 ```
 
@@ -66,7 +67,7 @@ For easier editing, the file `webViper-rule-template.json` contains a basic temp
 
 
 ## Help, support and issues or bugs
-**Note:** There is sometimes helpful output in the *web developer console*. Usually the *webdeveloper console* can be opened using, the `F12`-key from within your browser (Firefox, Chrome...).
+**Note:** There is sometimes helpful output in the *web developer console*. Usually the *web developer console* can be opened using, the `F12`-key from within your browser (Firefox, Chrome...).
 In case of help for websites, you can open a issue with the **url** (of course!) and a example keyword and at best, a screenshot where the content appears on the website!
 
 Issue can be reported at *issues*: https://github.com/jrie/webViper/issues
