@@ -208,6 +208,7 @@ const controlSaveGlobalKeywords = document.getElementById('saveGlobalKeywords');
 // Import rules fields
 // ---------------------------------------------------
 const controlImportRuleSets = document.getElementById('importRuleSets');
+const controlOverwriteRulesOnMerge = document.getElementById('overwriteRulesOnMerge');
 const controlSaveImportRuleSets = document.getElementById('saveImportRuleSets');
 
 // ---------------------------------------------------
@@ -832,22 +833,33 @@ function initUI() {
             return;
         }
 
-        ruleSet = Object.assign({}, baseRuleSet);
+        let ruleCount = Object.keys(importRuleData).length;
+        if (ruleCount === 0) {
+            window.alert('Empty URL rules (JSON data) provided.');
+            return;
+        }
+
+        const doOverwriteImport = controlOverwriteRulesOnMerge.checked;
 
         let ruleKeys = Object.keys(importRuleData);
+
         for (const url of ruleKeys) {
-            // TODO: Do not overwrite, merge? - Offer option in UI..
-            //const merged = Object.assign({}, baseRuleSet[url], importRuleData[url]);
-            if (Object.hasOwn(baseRuleSet, url)) {
-                ruleSet[url] = Object.assign(baseRuleSet[url], importRuleData[url]);
-            } else {
+            let hasExistingRule = Object.hasOwn(ruleSet, url);
+
+            if (doOverwriteImport || !hasExistingRule) {
                 ruleSet[url] = importRuleData[url];
+                continue;
             }
+
+            const mergedRule = mergeRules(ruleSet[url], importRuleData[url], {});
+            console.log('mergedRule', mergedRule);
+            alert('in merge');
+            ruleSet[url] = mergedRule;
         }
 
         setDisableState(evt.target, true);
         if (saveSetting(pathRuleSet, ruleSet)) {
-            window.alert('Succesfully imported rules for:\n\n' + ruleKeys.join('\n'));
+            window.alert('Succesfully imported ' + ruleCount + ' rule(s) for:\n\n' + ruleKeys.join('\n'));
             setDisableState(controlSaveImportRuleSets, true);
 
             // Force UI clearing...
@@ -884,12 +896,79 @@ function initUI() {
 }
 
 // ---------------------------------------------------------------------------------------
-// Misc helpers
+// Merge rule helper
+// ---------------------------------------------------------------------------------------
+function mergeRules(src, merger, output) {
+    if (Array.isArray(src) || Array.isArray(merger)) {
+        output = [];
+
+        if (!src) {
+            output = merger;
+        } else {
+            output = src;
+
+            if (merger) {
+                for (const item of merger) {
+                    if (src.indexOf(item) !== -1) {
+                        continue;
+                    }
+
+                    output.push(item);
+                }
+            }
+        }
+    } else if (typeof src === 'object' || typeof merger === 'object') {
+        let keysSrc = Object.keys(src);
+
+        for (let key of keysSrc) {
+            if (!output[key]) {
+                output[key] = {};
+            }
+
+            if (Object.hasOwn(merger, key)) {
+                output[key] = mergeRules(src[key], merger[key], output[key]);
+            } else {
+                output[key] = src[key];
+            }
+        }
+
+        let keysMerger = Object.keys(merger);
+
+        for (let key of keysMerger) {
+            if (!output[key]) {
+                output[key] = {};
+            }
+
+            if (Object.hasOwn(src, key)) {
+                output[key] = mergeRules(src[key], merger[key], output[key]);
+            } else {
+                output[key] = merger[key];
+            }
+        }
+    } else {
+        if (src) {
+            output = src;
+        } else if (merger) {
+            output = merger;
+        }
+    }
+
+    return output;
+}
+
+// ---------------------------------------------------------------------------------------
+// Misc helper
 // ---------------------------------------------------------------------------------------
 function clearUIAfterImport() {
+    clearRuleValues();
+
     let UItextElements = document.querySelectorAll('input, textarea');
 
     for (let item of UItextElements) {
+        if (item.getAttribute('id') === 'importRuleSets') {
+            continue;
+        }
+
         item.value = '';
     }
 
@@ -915,6 +994,17 @@ function clearUIAfterImport() {
             }
         }
     }
+
+    controlUrlRuleList.value = '';
+    controlNewURLRuleAction.value = getDatasetValue(controlNewURLRuleAction, originalValueStore);
+    setDisableState(controlSearchDeleteRule, true);
+
+    disableNavItem(navKeywords);
+    disableNavItem(navExcludes);
+    disableNavItem(navElementContainers);
+    disableNavItem(navVariousOptions);
+
+    controlOverwriteRulesOnMerge.removeAttribute('checked');
 }
 
 // ---------------------------------------------------------------------------------------
