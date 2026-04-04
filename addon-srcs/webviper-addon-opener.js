@@ -32,15 +32,11 @@ function setupWindow(parentWindow) {
 }
 
 if (!useChrome) {
-    const windowURL = browser.runtime.getURL(
-        '/addon-srcs/webviper-addon-ui.html'
-    );
+    const windowURL = browser.runtime.getURL('/addon-srcs/webviper-addon-ui.html');
     windowData.url = windowURL;
     browser.windows.getCurrent(getInfoParams).then(setupWindow);
 } else {
-    const windowURL = chrome.runtime.getURL(
-        '/addon-srcs/webviper-addon-ui.html'
-    );
+    const windowURL = chrome.runtime.getURL('/addon-srcs/webviper-addon-ui.html');
     windowData.url = windowURL;
     chrome.windows.getCurrent(getInfoParams).then(setupWindow);
 }
