@@ -1,14 +1,11 @@
 {
     "gog.com": {
-            "keywords": [
-            "in library",
-            "in der bibliothek"
-        ],
-            "excludes": [],
-            "removeElement": true,
-            "showUnhide": true,
-            "animateUnhide": true,
-            "elementContainers": {
+        "keywords": ["in library", "in der bibliothek"],
+        "excludes": [],
+        "removeElement": true,
+        "showUnhide": true,
+        "animateUnhide": true,
+        "elementContainers": {
             "span.product-label__text": [
                 ".swiper-slide:has(big-spot)",
                 ".paginated-products-grid ~ a.product-tile",
@@ -16,11 +13,8 @@
                 "product-tile:has(store-picture)"
             ]
         },
-            "observerContainers": {
-            ".paginated-products-grid": [
-                "c",
-                "paginated-products-grid"
-            ]
+        "observerContainers": {
+            ".paginated-products-grid": ["c", "paginated-products-grid"]
         }
     }
 }
