@@ -209,6 +209,43 @@ button:disabled {
     position: relative;
 }
 
+.actionItem .labelContainer {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #242;
+    margin-bottom: 0.3rem;
+    font-size: 0.7rem;
+    font-family: monospace;
+    color: #eee;
+    box-shadow: 2px 1px 3px rgba(0, 0, 0, 0.2);
+    background-color: rgba(24, 104, 24, 0.46);
+    letter-spacing: 0.02rem;
+    box-sizing: border-box;
+    z-index: 1;
+    position: relative;
+}
+
+.actionItem .labelContainer:hover,
+.actionItem .labelContainer:has(input:focus) {
+    background-color: rgba(48, 149, 24, 0.7);
+    border: 1px solid #363;
+    outline: none;
+}
+
+.actionItem input[type="checkbox"] {
+    width: auto;
+    padding: unset;
+    border: unset;
+    height: auto;
+    padding: unset;
+
+}
+
+.actionItem label {
+    display: inline-block;
+    width: 100%;
+}
+
 .actionItem .expand-input {
     position: relative;
     width: inherit;
@@ -325,6 +362,7 @@ button:disabled {
 
 .multiContainer .buttonActions .left-actions {
     display: flex;
+    text-align: left;
 }
 
 .multiContainer .buttonActions .left-actions button {
